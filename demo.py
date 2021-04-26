@@ -1,15 +1,15 @@
-import bisect
+# import bisect
 import os
-import sys
+# import sys
 import urwid
 
 home = os.getenv("HOME")
-pass_dir = os.getenv("PASSWORD_STORE_DIR", os.path.join(home, ".password_store"))
+PASS_DIR = os.getenv("PASSWORD_STORE_DIR", os.path.join(home, ".password_store"))
 
 dir_contents = []
-for root, dirs, files in os.walk(pass_dir):
-    if not root.startswith(os.path.join(pass_dir, '.git')) and root != pass_dir:
-        dir_contents.append([root] + dirs + files)
+for root, dirs, files in os.walk(PASS_DIR):
+    if not root.startswith(os.path.join(PASS_DIR, '.git')) and root != PASS_DIR:
+        dir_contents.append([root.removeprefix(PASS_DIR)] + dirs + files)
 
 
 class SelectableText(urwid.Text):
@@ -35,7 +35,11 @@ class SearchBox(urwid.Edit):
 
 class FileList(urwid.ListBox):
     def mouse_event(self, size, event, button, col, row, focus):
+        debug.set_text("{} {} {} {} {} {}".format(
+            size, event, button, col, row, focus
+        ))
         if button in [4, 5]:
+            # TODO: this is not the same as 'up' and 'down' key
             total = len(self.body)
             curr = self.focus_position
             if button == 4:
@@ -43,14 +47,12 @@ class FileList(urwid.ListBox):
             if button == 5:
                 self.set_focus(curr + 1 if curr < total - 1 else total - 1)
             return None
-        else:
-            debug.set_text("{} {} {} {} {} {}".format(
-                size, event, button, col, row, focus
-            ))
         super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size, key):
         keymap = {
+            'g': 'home',
+            'G': 'end',
             'j': 'down',
             'k': 'up',
             'ctrl y': 'down',
@@ -108,28 +110,28 @@ def update_view():
             middle.contents = [(listbox, ('weight', 2)),
                                (divider, ('pack', None)),
                                (preview, ('weight', 1))]
-            preview.original_widget.set_text("\n".join(dir_contents[focus[1]]))
+            preview.original_widget.set_text("\n".join(dir_contents[focus[1]][1:]))
 
         footer.set_text("{}/{}".format(focus[1] + 1, len(content)))
 
 
 content = urwid.SimpleListWalker([urwid.AttrMap(SelectableText(walks[0]), '',  'focus')
-    for walks in dir_contents])
+                                  for walks in dir_contents])
 
 listbox = FileList(content)
 
-header = urwid.Text('My demo application')
-footer = urwid.Text('')
+header = urwid.Text('My demo application - {}'.format(PASS_DIR))
+footer = urwid.Text('', align='right')
 debug = urwid.Text('')
-preview = urwid.Filler(urwid.Text(''))
-edit = SearchBox("Search: ")
+preview = urwid.Filler(urwid.Text(''), valign='top')
+edit = SearchBox("/")
 divider = urwid.Divider('-')
 
 middle = urwid.Pile([
     ('weight', 2, listbox),
     ('pack',      divider),
     ('weight', 1, preview)])
-wrapped = urwid.Frame(middle, debug, footer, focus_part='body')
+wrapped = urwid.Frame(middle, header, footer, focus_part='body')
 
 palette = [
     ('focus', 'black', 'dark cyan', 'standout'),
@@ -141,4 +143,6 @@ palette = [
 urwid.connect_signal(content, 'modified', update_view)
 update_view()
 
-urwid.MainLoop(wrapped, palette=palette, unhandled_input=unhandled_input).run()
+loop = urwid.MainLoop(wrapped, palette=palette, unhandled_input=unhandled_input)
+loop.screen.set_input_timeouts(complete_wait=0)
+loop.run()
