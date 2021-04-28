@@ -1,6 +1,5 @@
-# import bisect
+#!/usr/bin/env python3
 import os
-# import sys
 import urwid
 
 home = os.getenv("HOME")
