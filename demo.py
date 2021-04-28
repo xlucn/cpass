@@ -24,7 +24,7 @@ class SelectableText(urwid.Text):
 
 class SearchBox(urwid.Edit):
     def keypress(self, size, key):
-        if key in ('escape'):
+        if key in ['escape']:
             self.set_edit_text('')
             wrapped.contents['footer'] = (footer, None)
             wrapped.set_focus('body')
