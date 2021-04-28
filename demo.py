@@ -2,11 +2,12 @@
 import os
 import urwid
 
-home = os.getenv("HOME")
-PASS_DIR = os.getenv("PASSWORD_STORE_DIR", os.path.join(home, ".password_store"))
+HOME = os.getenv("HOME")
+FALLBACK_PASS_DIR = os.path.join(HOME, ".password_store")
+PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
 
 dir_contents = []
-for root, dirs, files in os.walk(PASS_DIR):
+for root, dirs, files in os.walk(PASS_DIR, topdown=True):
     if not root.startswith(os.path.join(PASS_DIR, '.git')) and root != PASS_DIR:
         dir_contents.append([root.removeprefix(PASS_DIR)] + dirs + files)
 
@@ -34,9 +35,9 @@ class SearchBox(urwid.Edit):
 
 class FileList(urwid.ListBox):
     def mouse_event(self, size, event, button, col, row, focus):
-        debug.set_text("{} {} {} {} {} {}".format(
-            size, event, button, col, row, focus
-        ))
+        # debug.set_text("{} {} {} {} {} {}".format(
+        #     size, event, button, col, row, focus
+        # ))
         if button in [4, 5]:
             # TODO: this is not the same as 'up' and 'down' key
             total = len(self.body)
@@ -61,7 +62,7 @@ class FileList(urwid.ListBox):
             'ctrl b': 'page up',
             'ctrl f': 'page down',
         }
-        debug.set_text("{} {}".format(key, size))
+        # debug.set_text("{} {}".format(key, size))
 
         if key in keymap.keys():
             super().keypress(size, keymap[key])
@@ -119,9 +120,9 @@ content = urwid.SimpleListWalker([urwid.AttrMap(SelectableText(walks[0]), '',  '
 
 listbox = FileList(content)
 
-header = urwid.Text('My demo application - {}'.format(PASS_DIR))
+header = urwid.Text('My demo application')
 footer = urwid.Text('', align='right')
-debug = urwid.Text('')
+# debug = urwid.Text('')
 preview = urwid.Filler(urwid.Text(''), valign='top')
 edit = SearchBox("/")
 divider = urwid.Divider('-')
@@ -140,8 +141,10 @@ palette = [
 
 # update upon list operations
 urwid.connect_signal(content, 'modified', update_view)
+# manually update when first opening the program
 update_view()
 
 loop = urwid.MainLoop(wrapped, palette=palette, unhandled_input=unhandled_input)
+# set the timeout after escape, or, set instant escape
 loop.screen.set_input_timeouts(complete_wait=0)
 loop.run()
