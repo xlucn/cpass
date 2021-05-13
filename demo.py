@@ -119,50 +119,45 @@ class Directory():
 class UI(urwid.Frame):
     def __init__(self):
         self.app_string = 'Pass tui'
-        self.header = urwid.Text('')
-        self.footer = urwid.Text('', align='right')
+        header = urwid.AttrMap(urwid.Text(''), 'border')
+        footer = urwid.AttrMap(urwid.Text('', align='right'), 'border')
+        self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
         self.debug = urwid.Text('')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.edit = SearchBox("/")
-        self.divider = urwid.Divider('-')
 
         self.walker = urwid.SimpleListWalker([
             PassNode(directory) for directory in allnodes[''].contents()
         ])
         self.listbox = PassList(self.walker)
-        self.middle = urwid.Pile([
-            ('weight', 2, self.listbox),
-            ('pack',      self.divider),
-            ('weight', 1, self.preview)
-        ])
+        if arg_preview in ['side', 'horizontal']:
+            self.middle = urwid.Columns([self.listbox, self.preview], dividechars=1)
+        elif arg_preview in ['bottom', 'vertical']:
+            self.middle = urwid.Pile([self.listbox, ('pack', self.divider), self.preview])
 
         # update upon list operations
         urwid.connect_signal(self.walker, 'modified', self.update_view)
         if DEBUG:
-            super().__init__(self.middle, self.debug, self.footer, focus_part='body')
+            super().__init__(self.middle, self.debug, footer, focus_part='body')
         else:
-            super().__init__(self.middle, self.header, self.footer, focus_part='body')
+            super().__init__(self.middle, header, footer, focus_part='body')
 
     def update_view(self):
         if self.listbox.focus is None:
-            self.middle.contents = [(self.listbox, ('weight', 100))]
-            self.footer.set_text("0/0")
+            self.footer.original_widget.set_text("0/0")
         else:
             text = self.listbox.focus.node
             node = os.path.join(self.listbox.root, text)
             if text in allnodes[self.listbox.root].dirs:
-                self.middle.contents = [(self.listbox, ('weight', 1)),
-                                        (self.divider, ('pack', None)),
-                                        (self.preview, ('weight', 1))]
                 self.preview.original_widget.set_text("\n".join(allnodes[node].contents()))
             else:
-                self.middle.contents = [(self.listbox, ('weight', 100))]
+                self.preview.original_widget.set_text("To be continued")
 
-            self.header.set_text('{}: {}'.format(
+            self.contents['header'][0].original_widget.set_text('{}: {}'.format(
                 self.app_string,
                 os.path.join(password_store.PASS_DIR, self.listbox.root)
             ))
-            self.footer.set_text("{}/{}".format(
+            self.contents['footer'][0].original_widget.set_text("{}/{}".format(
                 self.listbox.focus_position + 1,
                 len(self.listbox.body)
             ))
@@ -195,6 +190,7 @@ def unhandled_input(key):
 
 
 if __name__ == '__main__':
+    arg_preview = 'side'
     DEBUG = os.getenv('DEBUG')
 
     password_store = Pass()
@@ -202,9 +198,9 @@ if __name__ == '__main__':
 
     passui = UI()
     loop = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=[
-        # name      fg          bg              styles
-        ('focus',   'black',    'dark cyan',    'standout'),
-        ('normal',  'white',    'dark gray'),
+        # name          fg              bg              styles
+        ('focus',       'black',        'dark cyan',    'standout'),
+        ('border',      'light cyan',   'default'),
     ])
     # set the timeout after escape, or, set instant escape
     loop.screen.set_input_timeouts(complete_wait=0)
