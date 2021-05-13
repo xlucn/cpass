@@ -2,17 +2,11 @@
 import os
 import urwid
 
-HOME = os.getenv("HOME")
-FALLBACK_PASS_DIR = os.path.join(HOME, ".password_store")
-PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
-
-dir_contents = []
-for root, dirs, files in os.walk(PASS_DIR, topdown=True):
-    if not root.startswith(os.path.join(PASS_DIR, '.git')) and root != PASS_DIR:
-        dir_contents.append([root.removeprefix(PASS_DIR)] + dirs + files)
-
 
 class SelectableText(urwid.Text):
+    def __init__(self, markup):
+        super().__init__(markup, wrap='clip')
+
     def selectable(self):
         """ make the widget selectable for navigating """
         return True
@@ -22,32 +16,47 @@ class SelectableText(urwid.Text):
         return key
 
 
+class PassNode(urwid.AttrMap):
+    def __init__(self, text):
+        super().__init__(SelectableText(text), '',  'focus')
+
+
 class SearchBox(urwid.Edit):
     def keypress(self, size, key):
+        if DEBUG:
+            passui.debug.set_text("{}".format(key))
         if key in ['esc']:
             self.set_edit_text('')
-            wrapped.contents['footer'] = (footer, None)
-            wrapped.set_focus('body')
+            passui.contents['footer'] = (passui.footer, None)
+            passui.set_focus('body')
+            return None
+        elif key in ['enter']:
+            passui.set_text("{}".format(key))
             return None
 
         return super().keypress(size, key)
 
 
-class FileList(urwid.ListBox):
+class PassList(urwid.ListBox):
+    def __init__(self, body, root=None):
+        self.root = root if root else ''
+        super().__init__(body)
+
     def mouse_event(self, size, event, button, col, row, focus):
-        # debug.set_text("{} {} {} {} {} {}".format(
-        #     size, event, button, col, row, focus
-        # ))
-        if button in [4, 5]:
-            # TODO: this is not the same as 'up' and 'down' key
-            total = len(self.body)
-            curr = self.focus_position
-            if button == 4:
-                self.set_focus(curr - 1 if curr > 0 else 0)
-            if button == 5:
-                self.set_focus(curr + 1 if curr < total - 1 else total - 1)
-            return None
-        super().mouse_event(size, event, button, col, row, focus)
+        if DEBUG:
+            passui.debug.set_text("{} {} {} {} {} {} {}".format(
+                size, event, button, col, row, focus, self.focus_position
+            ))
+        if button in [1] and row == self.focus_position:
+            self.keypress(size, 'enter')
+        elif button in [3]:
+            self.keypress(size, 'left')
+        elif button in [4]:
+            self.keypress(size, 'up')
+        elif button in [5]:
+            self.keypress(size, 'down')
+        else:
+            return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size, key):
         keymap = {
@@ -62,21 +71,22 @@ class FileList(urwid.ListBox):
             'ctrl b': 'page up',
             'ctrl f': 'page down',
         }
-        # debug.set_text("{} {}".format(key, size))
+        if DEBUG:
+            passui.debug.set_text("{} {}".format(key, size))
 
         if key in keymap.keys():
             super().keypress(size, keymap[key])
             return None
         elif key in ['d']:
-            if len(content) > 0:
-                content.pop(self.focus_position)
+            if len(self.body) > 0:
+                self.body.pop(self.focus_position)
             return None
         elif key in ['a']:
-            content.append(urwid.AttrMap(SelectableText('foonew'), '',  'focus'))
+            self.body.insert(self.focus_position, PassNode('foonew'))
             return None
         elif key in ['/']:
-            wrapped.contents['footer'] = (edit, None)
-            wrapped.set_focus('footer')
+            passui.contents['footer'] = (passui.edit, None)
+            passui.set_focus('footer')
             return None
         elif key in ['ctrl d', 'ctrl u']:
             total = len(self.body)
@@ -87,8 +97,83 @@ class FileList(urwid.ListBox):
             if key == 'ctrl d':
                 self.set_focus(curr + offset if curr < total - offset else total - 1)
             return None
+        elif key in ['l', 'enter', 'right']:
+            if self.focus.original_widget.text in allnodes[self.root].dirs:
+                self.root = os.path.join(self.root, self.focus.original_widget.text)
+                self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
+                return None
+        elif key in ['h', 'left']:
+            self.root = os.path.dirname(self.root)
+            self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
+            return None
 
         return super().keypress(size, key)
+
+
+class Directory():
+    def __init__(self, root, dirs, files):
+        self.root = root
+        self.dirs = dirs
+        self.files = files
+        self.pos = 0
+
+    def contents(self):
+        return self.dirs + self.files
+
+
+class UI(urwid.Frame):
+    def __init__(self):
+        self.header = urwid.Text('My demo application')
+        self.footer = urwid.Text('', align='right')
+        self.debug = urwid.Text('')
+        self.preview = urwid.Filler(urwid.Text(''), valign='top')
+        self.edit = SearchBox("/")
+        self.divider = urwid.Divider('-')
+
+        self.walker = urwid.SimpleListWalker([
+            PassNode(directory) for directory in allnodes[''].contents()
+        ])
+        self.listbox = PassList(self.walker)
+        self.middle = urwid.Pile([
+            ('weight', 2, self.listbox),
+            ('pack',      self.divider),
+            ('weight', 1, self.preview)
+        ])
+
+        # update upon list operations
+        urwid.connect_signal(self.walker, 'modified', self.update_view)
+        if DEBUG:
+            super().__init__(self.middle, self.debug, self.footer, focus_part='body')
+        else:
+            super().__init__(self.middle, self.header, self.footer, focus_part='body')
+
+    def update_view(self):
+        if self.listbox.focus is None:
+            self.middle.contents = [(self.listbox, ('weight', 100))]
+            self.footer.set_text("0/0")
+        else:
+            text = self.listbox.focus.original_widget.get_text()[0]
+            node = os.path.join(self.listbox.root, text)
+            if DEBUG:
+                self.debug.set_text(';'.join([
+                    str(self.listbox.focus_position),
+                    text,
+                    self.listbox.root,
+                    node,
+                    str(type(self.listbox.focus.original_widget))
+                ]))
+            if text in allnodes[self.listbox.root].dirs:
+                self.middle.contents = [(self.listbox, ('weight', 2)),
+                                        (self.divider, ('pack', None)),
+                                        (self.preview, ('weight', 1))]
+                self.preview.original_widget.set_text("\n".join(allnodes[node].contents()))
+            else:
+                self.middle.contents = [(self.listbox, ('weight', 100))]
+
+            self.footer.set_text("{}/{}".format(
+                self.listbox.focus_position + 1,
+                len(self.listbox.body)
+            ))
 
 
 def unhandled_input(key):
@@ -97,54 +182,36 @@ def unhandled_input(key):
     return True
 
 
-def update_view():
-    focus = listbox.get_focus()
-    if focus[0] is None:
-        middle.contents = [(listbox, ('weight', 100))]
-        footer.set_text("0/0")
-    else:
-        text = focus[0].original_widget.get_text()[0]
-        if text[:3] == 'foo':
-            middle.contents = [(listbox, ('weight', 100))]
-        else:
-            middle.contents = [(listbox, ('weight', 2)),
-                               (divider, ('pack', None)),
-                               (preview, ('weight', 1))]
-            preview.original_widget.set_text("\n".join(dir_contents[focus[1]][1:]))
+def extract_pass():
+    HOME = os.getenv("HOME")
+    FALLBACK_PASS_DIR = os.path.join(HOME, ".password_store")
+    PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
 
-        footer.set_text("{}/{}".format(focus[1] + 1, len(content)))
-
-
-content = urwid.SimpleListWalker([urwid.AttrMap(SelectableText(walks[0]), '',  'focus')
-                                  for walks in dir_contents])
-
-listbox = FileList(content)
-
-header = urwid.Text('My demo application')
-footer = urwid.Text('', align='right')
-# debug = urwid.Text('')
-preview = urwid.Filler(urwid.Text(''), valign='top')
-edit = SearchBox("/")
-divider = urwid.Divider('-')
-
-middle = urwid.Pile([
-    ('weight', 2, listbox),
-    ('pack',      divider),
-    ('weight', 1, preview)])
-wrapped = urwid.Frame(middle, header, footer, focus_part='body')
-
-palette = [
-    ('focus', 'black', 'dark cyan', 'standout'),
-    ('normal', 'white', 'dark gray'),
-]
+    dir_contents = {}
+    for root, dirs, files in os.walk(PASS_DIR, topdown=True):
+        if not root.startswith(os.path.join(PASS_DIR, '.git')):
+            dirs = [os.path.join('', d) for d in dirs if d != '.git']
+            files = [file.rstrip('.gpg') for file in files if file.endswith('.gpg')]
+            relroot = os.path.normpath(os.path.join('', os.path.relpath(root, PASS_DIR)))
+            if relroot == '.':
+                relroot = ''
+            dir_contents[relroot] = Directory(relroot, dirs, files)
+    return dir_contents
 
 
-# update upon list operations
-urwid.connect_signal(content, 'modified', update_view)
-# manually update when first opening the program
-update_view()
+if __name__ == '__main__':
+    DEBUG = os.getenv('DEBUG')
 
-loop = urwid.MainLoop(wrapped, palette=palette, unhandled_input=unhandled_input)
-# set the timeout after escape, or, set instant escape
-loop.screen.set_input_timeouts(complete_wait=0)
-loop.run()
+    allnodes = extract_pass()
+
+    passui = UI()
+    loop = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=[
+        # name      fg          bg              styles
+        ('focus',   'black',    'dark cyan',    'standout'),
+        ('normal',  'white',    'dark gray'),
+    ])
+    # set the timeout after escape, or, set instant escape
+    loop.screen.set_input_timeouts(complete_wait=0)
+    # manually update when first opening the program
+    passui.update_view()
+    loop.run()
