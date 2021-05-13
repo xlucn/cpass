@@ -76,20 +76,16 @@ class PassList(urwid.ListBox):
         if DEBUG:
             passui.debug.set_text("{} {}".format(key, size))
 
-        if key in keymap.keys():
-            super().keypress(size, keymap[key])
-            return None
+        if key in keymap:
+            return super().keypress(size, keymap[key])
         elif key in ['d']:
             if len(self.body) > 0:
                 self.body.pop(self.focus_position)
-            return None
         elif key in ['a']:
             self.body.insert(self.focus_position, PassNode('foonew'))
-            return None
         elif key in ['/']:
             passui.contents['footer'] = (passui.edit, None)
             passui.set_focus('footer')
-            return None
         elif key in ['ctrl d', 'ctrl u']:
             total = len(self.body)
             curr = self.focus_position
@@ -98,18 +94,16 @@ class PassList(urwid.ListBox):
                 self.set_focus(curr - offset if curr > offset - 1 else 0)
             if key == 'ctrl d':
                 self.set_focus(curr + offset if curr < total - offset else total - 1)
-            return None
         elif key in ['l', 'enter', 'right']:
             if self.focus.node in allnodes[self.root].dirs:
                 self.root = path.join(self.root, self.focus.node)
+                # this way the list itself is not replaced, same down there
                 self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
-                return None
         elif key in ['h', 'left']:
             self.root = path.dirname(self.root)
             self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
-            return None
-
-        return super().keypress(size, key)
+        else:
+            return super().keypress(size, key)
 
 
 class Directory():
@@ -155,18 +149,10 @@ class UI(urwid.Frame):
             self.middle.contents = [(self.listbox, ('weight', 100))]
             self.footer.set_text("0/0")
         else:
-            if DEBUG:
-                self.debug.set_text(';'.join([
-                    str(self.listbox.focus_position),
-                    text,
-                    self.listbox.root,
-                    node,
-                    str(type(self.listbox.focus.original_widget))
-                ]))
             text = self.listbox.focus.node
             node = path.join(self.listbox.root, text)
             if text in allnodes[self.listbox.root].dirs:
-                self.middle.contents = [(self.listbox, ('weight', 2)),
+                self.middle.contents = [(self.listbox, ('weight', 1)),
                                         (self.divider, ('pack', None)),
                                         (self.preview, ('weight', 1))]
                 self.preview.original_widget.set_text("\n".join(allnodes[node].contents()))
