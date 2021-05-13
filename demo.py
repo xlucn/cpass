@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import os.path as path
 import urwid
 
 
@@ -19,6 +20,7 @@ class SelectableText(urwid.Text):
 class PassNode(urwid.AttrMap):
     def __init__(self, text):
         super().__init__(SelectableText(text), '',  'focus')
+        self.node = self.original_widget.text
 
 
 class SearchBox(urwid.Edit):
@@ -98,12 +100,12 @@ class PassList(urwid.ListBox):
                 self.set_focus(curr + offset if curr < total - offset else total - 1)
             return None
         elif key in ['l', 'enter', 'right']:
-            if self.focus.original_widget.text in allnodes[self.root].dirs:
-                self.root = os.path.join(self.root, self.focus.original_widget.text)
+            if self.focus.node in allnodes[self.root].dirs:
+                self.root = path.join(self.root, self.focus.node)
                 self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
                 return None
         elif key in ['h', 'left']:
-            self.root = os.path.dirname(self.root)
+            self.root = path.dirname(self.root)
             self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
             return None
 
@@ -152,8 +154,6 @@ class UI(urwid.Frame):
             self.middle.contents = [(self.listbox, ('weight', 100))]
             self.footer.set_text("0/0")
         else:
-            text = self.listbox.focus.original_widget.get_text()[0]
-            node = os.path.join(self.listbox.root, text)
             if DEBUG:
                 self.debug.set_text(';'.join([
                     str(self.listbox.focus_position),
@@ -162,6 +162,8 @@ class UI(urwid.Frame):
                     node,
                     str(type(self.listbox.focus.original_widget))
                 ]))
+            text = self.listbox.focus.node
+            node = path.join(self.listbox.root, text)
             if text in allnodes[self.listbox.root].dirs:
                 self.middle.contents = [(self.listbox, ('weight', 2)),
                                         (self.divider, ('pack', None)),
