@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import os.path as path
 import urwid
 
 
@@ -96,11 +95,11 @@ class PassList(urwid.ListBox):
                 self.set_focus(curr + offset if curr < total - offset else total - 1)
         elif key in ['l', 'enter', 'right']:
             if self.focus.node in allnodes[self.root].dirs:
-                self.root = path.join(self.root, self.focus.node)
+                self.root = os.path.join(self.root, self.focus.node)
                 # this way the list itself is not replaced, same down there
                 self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
         elif key in ['h', 'left']:
-            self.root = path.dirname(self.root)
+            self.root = os.path.dirname(self.root)
             self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
         else:
             return super().keypress(size, key)
@@ -150,7 +149,7 @@ class UI(urwid.Frame):
             self.footer.set_text("0/0")
         else:
             text = self.listbox.focus.node
-            node = path.join(self.listbox.root, text)
+            node = os.path.join(self.listbox.root, text)
             if text in allnodes[self.listbox.root].dirs:
                 self.middle.contents = [(self.listbox, ('weight', 1)),
                                         (self.divider, ('pack', None)),
@@ -161,7 +160,7 @@ class UI(urwid.Frame):
 
             self.header.set_text('{}: {}'.format(
                 self.app_string,
-                path.join(password_store.PASS_DIR, self.listbox.root)
+                os.path.join(password_store.PASS_DIR, self.listbox.root)
             ))
             self.footer.set_text("{}/{}".format(
                 self.listbox.focus_position + 1,
