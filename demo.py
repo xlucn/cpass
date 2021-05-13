@@ -32,7 +32,7 @@ class SearchBox(urwid.Edit):
             passui.set_focus('body')
             return None
         elif key in ['enter']:
-            passui.set_text("{}".format(key))
+            passui.debug.set_text("{}".format(key))
             return None
 
         return super().keypress(size, key)
