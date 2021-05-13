@@ -125,7 +125,8 @@ class Directory():
 
 class UI(urwid.Frame):
     def __init__(self):
-        self.header = urwid.Text('My demo application')
+        self.app_string = 'Pass tui'
+        self.header = urwid.Text('')
         self.footer = urwid.Text('', align='right')
         self.debug = urwid.Text('')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
@@ -172,10 +173,34 @@ class UI(urwid.Frame):
             else:
                 self.middle.contents = [(self.listbox, ('weight', 100))]
 
+            self.header.set_text('{}: {}'.format(
+                self.app_string,
+                path.join(password_store.PASS_DIR, self.listbox.root)
+            ))
             self.footer.set_text("{}/{}".format(
                 self.listbox.focus_position + 1,
                 len(self.listbox.body)
             ))
+
+
+class Pass():
+    """ pass operations """
+    def __init__(self):
+        HOME = os.getenv("HOME")
+        FALLBACK_PASS_DIR = os.path.join(HOME, ".password_store")
+        self.PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
+
+    def extract_pass(self):
+        dir_contents = {}
+        for root, dirs, files in os.walk(self.PASS_DIR, topdown=True):
+            if not root.startswith(os.path.join(self.PASS_DIR, '.git')):
+                dirs = [os.path.join('', d) for d in dirs if d != '.git']
+                files = [file.rstrip('.gpg') for file in files if file.endswith('.gpg')]
+                relroot = os.path.normpath(os.path.join('', os.path.relpath(root, self.PASS_DIR)))
+                if relroot == '.':
+                    relroot = ''
+                dir_contents[relroot] = Directory(relroot, dirs, files)
+        return dir_contents
 
 
 def unhandled_input(key):
@@ -184,27 +209,11 @@ def unhandled_input(key):
     return True
 
 
-def extract_pass():
-    HOME = os.getenv("HOME")
-    FALLBACK_PASS_DIR = os.path.join(HOME, ".password_store")
-    PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
-
-    dir_contents = {}
-    for root, dirs, files in os.walk(PASS_DIR, topdown=True):
-        if not root.startswith(os.path.join(PASS_DIR, '.git')):
-            dirs = [os.path.join('', d) for d in dirs if d != '.git']
-            files = [file.rstrip('.gpg') for file in files if file.endswith('.gpg')]
-            relroot = os.path.normpath(os.path.join('', os.path.relpath(root, PASS_DIR)))
-            if relroot == '.':
-                relroot = ''
-            dir_contents[relroot] = Directory(relroot, dirs, files)
-    return dir_contents
-
-
 if __name__ == '__main__':
     DEBUG = os.getenv('DEBUG')
 
-    allnodes = extract_pass()
+    password_store = Pass()
+    allnodes = password_store.extract_pass()
 
     passui = UI()
     loop = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=[
