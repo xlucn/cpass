@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import urwid
+from subprocess import run, PIPE
 
 
 def debug(message):
@@ -119,6 +120,7 @@ class Directory():
 
 class UI(urwid.Frame):
     def __init__(self):
+        self._last_preview = None
         self.app_string = 'Pass tui'
         header = urwid.AttrMap(urwid.Text(''), 'border')
         footer = urwid.AttrMap(urwid.Text('', align='right'), 'border')
@@ -142,22 +144,38 @@ class UI(urwid.Frame):
     def update_view(self):
         if self.listbox.focus is None:
             self.footer.original_widget.set_text("0/0")
-        else:
-            text = self.listbox.focus.node
-            node = os.path.join(self.listbox.root, text)
-            if text in allnodes[self.listbox.root].dirs:
-                self.preview.original_widget.set_text("\n".join(allnodes[node].contents()))
-            else:
-                self.preview.original_widget.set_text("To be continued")
+            return
 
-            self.contents['header'][0].original_widget.set_text('{}: {}'.format(
-                self.app_string,
-                os.path.join(password_store.PASS_DIR, self.listbox.root)
-            ))
-            self.contents['footer'][0].original_widget.set_text("{}/{}".format(
-                self.listbox.focus_position + 1,
-                len(self.listbox.body)
-            ))
+        text = self.listbox.focus.node
+        node = os.path.join(self.listbox.root, text)
+
+        if node == self._last_preview:
+            # don't update if the node does not change
+            # still problematic due to I am using listbox.keypress() to navigate, what urwid
+            # is doing under the ground might trigger this function multiple times when there
+            # is no need. investigation is required, otherwise the navigation need to be
+            # impletemented manually in a low level.
+            # I intended not to have this code, since this does not solve all problems
+            # at once
+            return
+
+        if text in allnodes[self.listbox.root].dirs:
+            preview = "\n".join(allnodes[node].contents())
+        else:
+            preview = password_store.show(node)
+            debug("password: " + preview)
+            debug("list length: {}".format(len(self.listbox.body)))
+        self.preview.original_widget.set_text(preview)
+        self._last_preview = node
+
+        self.contents['header'][0].original_widget.set_text('{}: {}'.format(
+            self.app_string,
+            os.path.join(password_store.PASS_DIR, self.listbox.root)
+        ))
+        self.contents['footer'][0].original_widget.set_text("{}/{}".format(
+            self.listbox.focus_position + 1,
+            len(self.listbox.body)
+        ))
 
 
 class Pass():
@@ -167,7 +185,7 @@ class Pass():
         FALLBACK_PASS_DIR = os.path.join(HOME, ".password_store")
         self.PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
 
-    def extract_pass(self):
+    def extract_all(self):
         dir_contents = {}
         for root, dirs, files in os.walk(self.PASS_DIR, topdown=True):
             if not root.startswith(os.path.join(self.PASS_DIR, '.git')):
@@ -179,6 +197,9 @@ class Pass():
                 dir_contents[relroot] = Directory(relroot, dirs, files)
         return dir_contents
 
+    def show(self, node):
+        result = run(['pass', 'show', node], stdout=PIPE, stderr=PIPE, text=True)
+        return result.stderr if result.returncode else result.stdout
 
 def unhandled_input(key):
     if key in ['q', 'Q']:
@@ -189,10 +210,16 @@ def unhandled_input(key):
 if __name__ == '__main__':
     arg_preview = 'side'
 
+    # pass backend
     password_store = Pass()
-    allnodes = password_store.extract_pass()
+    allnodes = password_store.extract_all()
 
+    # UI
     passui = UI()
+    # manually update when first opening the program
+    passui.update_view()
+
+    # main loop
     loop = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=[
         # name          fg              bg              styles
         ('focus',       'black',        'dark cyan',    'standout'),
@@ -200,6 +227,4 @@ if __name__ == '__main__':
     ])
     # set the timeout after escape, or, set instant escape
     loop.screen.set_input_timeouts(complete_wait=0)
-    # manually update when first opening the program
-    passui.update_view()
     loop.run()
