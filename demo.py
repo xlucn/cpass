@@ -95,14 +95,17 @@ class PassList(urwid.ListBox):
                 self.set_focus(curr - offset if curr > offset - 1 else 0)
             if key == 'ctrl d':
                 self.set_focus(curr + offset if curr < total - offset else total - 1)
-        elif key in ['l', 'enter', 'right']:
-            if self.focus.node in allnodes[self.root].dirs:
-                self.root = os.path.join(self.root, self.focus.node)
-                # this way the list itself is not replaced, same down there
-                self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
-        elif key in ['h', 'left']:
-            self.root = os.path.dirname(self.root)
+        elif key in ['l', 'h', 'enter', 'right', 'left']:
+            # record current position
+            allnodes[self.root].pos = self.focus_position
+            if key in ['l', 'enter', 'right']:
+                if self.focus.node in allnodes[self.root].dirs:
+                    self.root = os.path.join(self.root, self.focus.node)
+            elif key in ['h', 'left']:
+                self.root = os.path.dirname(self.root)
+            # this way the list itself is not replaced, same down there
             self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
+            self.focus_position = allnodes[self.root].pos
         else:
             return super().keypress(size, key)
 
