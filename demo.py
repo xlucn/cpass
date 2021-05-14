@@ -3,6 +3,11 @@ import os
 import urwid
 
 
+def debug(message):
+    if os.getenv('DEBUG'):
+        open('log', 'a').write(message + '\n')
+
+
 class SelectableText(urwid.Text):
     def __init__(self, markup):
         super().__init__(markup, wrap='clip')
@@ -24,15 +29,13 @@ class PassNode(urwid.AttrMap):
 
 class SearchBox(urwid.Edit):
     def keypress(self, size, key):
-        if DEBUG:
-            passui.debug.set_text("{}".format(key))
+        debug(key)
         if key in ['esc']:
             self.set_edit_text('')
             passui.contents['footer'] = (passui.footer, None)
             passui.set_focus('body')
             return None
         elif key in ['enter']:
-            passui.debug.set_text("{}".format(key))
             return None
 
         return super().keypress(size, key)
@@ -44,10 +47,9 @@ class PassList(urwid.ListBox):
         super().__init__(body)
 
     def mouse_event(self, size, event, button, col, row, focus):
-        if DEBUG:
-            passui.debug.set_text("{} {} {} {} {} {} {}".format(
-                size, event, button, col, row, focus, self.focus_position
-            ))
+        debug("{} {} {} {} {} {} {}".format(
+            size, event, button, col, row, focus, self.focus_position
+        ))
         if button in [1] and row == self.focus_position:
             self.keypress(size, 'enter')
         elif button in [3]:
@@ -72,8 +74,7 @@ class PassList(urwid.ListBox):
             'ctrl b': 'page up',
             'ctrl f': 'page down',
         }
-        if DEBUG:
-            passui.debug.set_text("{} {}".format(key, size))
+        debug("{} {}".format(key, size))
 
         if key in keymap:
             return super().keypress(size, keymap[key])
@@ -122,7 +123,6 @@ class UI(urwid.Frame):
         header = urwid.AttrMap(urwid.Text(''), 'border')
         footer = urwid.AttrMap(urwid.Text('', align='right'), 'border')
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
-        self.debug = urwid.Text('')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.edit = SearchBox("/")
 
@@ -137,10 +137,7 @@ class UI(urwid.Frame):
 
         # update upon list operations
         urwid.connect_signal(self.walker, 'modified', self.update_view)
-        if DEBUG:
-            super().__init__(self.middle, self.debug, footer, focus_part='body')
-        else:
-            super().__init__(self.middle, header, footer, focus_part='body')
+        super().__init__(self.middle, self.header_widget, self.footer_widget, focus_part='body')
 
     def update_view(self):
         if self.listbox.focus is None:
@@ -191,7 +188,6 @@ def unhandled_input(key):
 
 if __name__ == '__main__':
     arg_preview = 'side'
-    DEBUG = os.getenv('DEBUG')
 
     password_store = Pass()
     allnodes = password_store.extract_pass()
