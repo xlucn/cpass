@@ -30,7 +30,7 @@ class PassNode(urwid.AttrMap):
 
 class SearchBox(urwid.Edit):
     def keypress(self, size, key):
-        debug(key)
+        debug("search box keypress: " + key)
         if key in ['esc']:
             self.set_edit_text('')
             passui.contents['footer'] = (passui.footer, None)
@@ -48,7 +48,7 @@ class PassList(urwid.ListBox):
         super().__init__(body)
 
     def mouse_event(self, size, event, button, col, row, focus):
-        debug("{} {} {} {} {} {} {}".format(
+        debug("passlist mouse event: {} {} {} {} {} {} {}".format(
             size, event, button, col, row, focus, self.focus_position
         ))
         if button in [1] and row == self.focus_position:
@@ -75,7 +75,7 @@ class PassList(urwid.ListBox):
             'ctrl b': 'page up',
             'ctrl f': 'page down',
         }
-        debug("{} {}".format(key, size))
+        debug("passlist keypress: {} {}".format(key, size))
 
         if key in keymap:
             return super().keypress(size, keymap[key])
