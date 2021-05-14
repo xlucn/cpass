@@ -1,3 +1,0 @@
-- use connect_signal to refresh search result on-the-fly.
-- background process to decrypt the files
-- learn from browse demo
