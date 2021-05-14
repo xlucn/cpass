@@ -33,7 +33,7 @@ class SearchBox(urwid.Edit):
         debug("search box keypress: " + key)
         if key in ['esc']:
             self.set_edit_text('')
-            passui.contents['footer'] = (passui.footer, None)
+            passui.contents['footer'] = (passui.footer_widget, None)
             passui.set_focus('body')
             return None
         elif key in ['enter']:
@@ -122,8 +122,8 @@ class UI(urwid.Frame):
     def __init__(self):
         self._last_preview = None
         self.app_string = 'Pass tui'
-        header = urwid.AttrMap(urwid.Text(''), 'border')
-        footer = urwid.AttrMap(urwid.Text('', align='right'), 'border')
+        self.header_widget = urwid.AttrMap(urwid.Text(''), 'border')
+        self.footer_widget = urwid.AttrMap(urwid.Text('', align='right'), 'border')
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.edit = SearchBox("/")
