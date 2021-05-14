@@ -184,8 +184,7 @@ class UI(urwid.Frame):
 class Pass():
     """ pass operations """
     def __init__(self):
-        HOME = os.getenv("HOME")
-        FALLBACK_PASS_DIR = os.path.join(HOME, ".password_store")
+        FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
         self.PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
 
     def extract_all(self):
