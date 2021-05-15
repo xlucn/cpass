@@ -44,8 +44,9 @@ class SearchBox(urwid.Edit):
 
 
 class PassList(urwid.ListBox):
-    def __init__(self, body, root=None):
+    def __init__(self, body, root=None, allpass=None):
         self.root = root if root else ''
+        self._all_pass = allpass
         super().__init__(body)
 
     def mouse_event(self, size, event, button, col, row, focus):
@@ -108,15 +109,15 @@ class PassList(urwid.ListBox):
 
     def dir_navigate(self, direction):
         # record current position
-        allnodes[self.root].pos = self.focus_position
+        self._all_pass[self.root].pos = self.focus_position
         if direction in 'down':
-            if self.focus.node in allnodes[self.root].dirs:
+            if self.focus.node in self._all_pass[self.root].dirs:
                 self.root = os.path.join(self.root, self.focus.node)
         elif direction in 'up':
             self.root = os.path.dirname(self.root)
         # this way the list itself is not replaced, same down there
-        self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
-        self.focus_position = allnodes[self.root].pos
+        self.body[:] = [PassNode(node) for node in self._all_pass[self.root].contents()]
+        self.focus_position = self._all_pass[self.root].pos
         urwid.emit_signal(self, 'update_view')
 
     def list_navigate(self, size, shift):
@@ -150,9 +151,10 @@ class Directory():
 
 
 class UI(urwid.Frame):
-    def __init__(self):
+    def __init__(self, allpass=None):
         self._last_preview = None
         self._app_string = 'Pass tui'
+        self._all_pass = allpass
         self.header_widget = urwid.AttrMap(urwid.Text(''), 'border')
         self.footer_widget = urwid.AttrMap(urwid.Text('', align='right'), 'border')
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
@@ -160,7 +162,7 @@ class UI(urwid.Frame):
         self.searchbox = SearchBox("/")
 
         self.walker = urwid.SimpleListWalker([
-            PassNode(directory) for directory in allnodes[''].contents()
+            PassNode(directory) for directory in self._all_pass[''].contents()
         ])
         self.listbox = PassList(self.walker)
         if arg_preview in ['side', 'horizontal']:
@@ -184,8 +186,8 @@ class UI(urwid.Frame):
         if node == self._last_preview:
             return
 
-        if text in allnodes[self.listbox.root].dirs:
-            preview = "\n".join(allnodes[node].contents())
+        if text in self._all_pass[self.listbox.root].dirs:
+            preview = "\n".join(self._all_pass[node].contents())
         else:
             preview = Pass.show(node)
             debug("password: " + preview)
@@ -235,10 +237,8 @@ def unhandled_input(key):
 if __name__ == '__main__':
     arg_preview = 'side'
 
-    allnodes = Pass.extract_all()
-
     # UI
-    passui = UI()
+    passui = UI(allpass=Pass.extract_all())
     # manually update when first opening the program
     passui.update_view()
 
