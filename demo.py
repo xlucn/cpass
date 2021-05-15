@@ -217,12 +217,12 @@ class Pass:
         dir_contents = {}
         for root, dirs, files in os.walk(cls.PASS_DIR, topdown=True):
             if not root.startswith(os.path.join(cls.PASS_DIR, '.git')):
+                root = os.path.normpath(os.path.relpath(root, cls.PASS_DIR))
                 dirs = [os.path.join('', d) for d in dirs if d != '.git']
                 files = [file.rstrip('.gpg') for file in files if file.endswith('.gpg')]
-                relroot = os.path.normpath(os.path.relpath(root, cls.PASS_DIR))
-                if relroot == '.':
-                    relroot = ''
-                dir_contents[relroot] = Directory(relroot, dirs, files)
+                if root == '.':
+                    root = ''
+                dir_contents[root] = Directory(root, dirs, files)
         return dir_contents
 
     @staticmethod
