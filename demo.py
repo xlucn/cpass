@@ -23,6 +23,8 @@ class SelectableText(urwid.Text):
 
 
 class PassNode(urwid.AttrMap):
+    # TODO: directory mark '/'
+    # TODO: children count
     def __init__(self, text):
         super().__init__(SelectableText(text), '',  'focus')
         self.node = self.original_widget.text
@@ -251,6 +253,6 @@ if __name__ == '__main__':
         ('focus',       'black',        'dark cyan',    'standout'),
         ('border',      'light cyan',   'default'),
     ])
-    # set the timeout after escape, or, set instant escape
+    # set no timeout after escape key
     loop.screen.set_input_timeouts(complete_wait=0)
     loop.run()
