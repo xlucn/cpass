@@ -52,33 +52,48 @@ class PassList(urwid.ListBox):
             size, event, button, col, row, focus, self.focus_position
         ))
         if button in [1] and row == self.focus_position:
-            self.keypress(size, 'enter')
+            self.dir_navigate('down')
         elif button in [3]:
-            self.keypress(size, 'left')
+            self.dir_navigate('up')
         elif button in [4]:
-            self.keypress(size, 'up')
+            self.list_navigate(size, -1)
         elif button in [5]:
-            self.keypress(size, 'down')
+            self.list_navigate(size, 1)
         else:
             return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size, key):
-        keymap = {
-            'g': 'home',
-            'G': 'end',
-            'j': 'down',
-            'k': 'up',
-            'ctrl y': 'down',
-            'ctrl e': 'up',
-            'ctrl n': 'down',
-            'ctrl p': 'up',
-            'ctrl b': 'page up',
-            'ctrl f': 'page down',
-        }
         debug("passlist keypress: {} {}".format(key, size))
-
-        if key in keymap:
-            return super().keypress(size, keymap[key])
+        list_navigations = {
+            'j': 1,
+            'k': -1,
+            'ctrl y': 1,
+            'ctrl n': 1,
+            'ctrl e': -1,
+            'ctrl p': -1,
+            'ctrl f': size[1],
+            'ctrl b': -size[1],
+            'ctrl d': size[1] // 2,
+            'ctrl u': -size[1] // 2,
+            'page up': -size[1],
+            'page down': size[1],
+            # overshoot to go to bottom/top
+            'G': len(self.body),
+            'g': -len(self.body),
+            'end': len(self.body),
+            'home': -len(self.body),
+        }
+        dir_navigations = {
+            'l':     'down',
+            'h':     'up',
+            'right': 'up',
+            'left':  'down',
+            'enter': 'up',
+        }
+        if key in list_navigations:
+            self.list_navigate(size, list_navigations[key])
+        elif key in dir_navigations:
+            self.dir_navigate(dir_navigations[key])
         elif key in ['d']:
             if len(self.body) > 0:
                 self.body.pop(self.focus_position)
@@ -87,27 +102,39 @@ class PassList(urwid.ListBox):
         elif key in ['/']:
             passui.contents['footer'] = (passui.edit, None)
             passui.set_focus('footer')
-        elif key in ['ctrl d', 'ctrl u']:
-            total = len(self.body)
-            curr = self.focus_position
-            offset = int(size[1] / 2)
-            if key == 'ctrl u':
-                self.set_focus(curr - offset if curr > offset - 1 else 0)
-            if key == 'ctrl d':
-                self.set_focus(curr + offset if curr < total - offset else total - 1)
-        elif key in ['l', 'h', 'enter', 'right', 'left']:
-            # record current position
-            allnodes[self.root].pos = self.focus_position
-            if key in ['l', 'enter', 'right']:
-                if self.focus.node in allnodes[self.root].dirs:
-                    self.root = os.path.join(self.root, self.focus.node)
-            elif key in ['h', 'left']:
-                self.root = os.path.dirname(self.root)
-            # this way the list itself is not replaced, same down there
-            self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
-            self.focus_position = allnodes[self.root].pos
         else:
             return super().keypress(size, key)
+
+    def dir_navigate(self, direction):
+        # record current position
+        allnodes[self.root].pos = self.focus_position
+        if direction in 'down':
+            if self.focus.node in allnodes[self.root].dirs:
+                self.root = os.path.join(self.root, self.focus.node)
+        elif direction in 'up':
+            self.root = os.path.dirname(self.root)
+        # this way the list itself is not replaced, same down there
+        self.body[:] = [PassNode(node) for node in allnodes[self.root].contents()]
+        self.focus_position = allnodes[self.root].pos
+        urwid.emit_signal(self, 'update_view')
+
+    def list_navigate(self, size, shift):
+        if len(self.body) == 0:
+            return
+        offset = self.get_focus_offset_inset(size)[0]
+        new_focus = self.focus_position + shift
+        new_offset = offset + shift
+        # border check
+        if new_focus < 0:
+            new_focus = 0
+        elif new_focus > len(self.body) - 1:
+            new_focus = len(self.body) - 1
+        if new_offset < 0:
+            new_offset = 0
+        elif new_offset > size[1] - 1:
+            new_offset = size[1] - 1
+        self.change_focus(size, new_focus, offset_inset=new_offset)
+        urwid.emit_signal(self, 'update_view')
 
 
 class Directory():
