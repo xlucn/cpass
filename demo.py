@@ -209,19 +209,14 @@ class Pass:
     PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
 
     @classmethod
-    def store_dir(cls):
-        return cls.PASS_DIR
-
-    @classmethod
     def extract_all(cls):
-        """ pass operations """
-
+        """ pass files traversal """
         dir_contents = {}
         for root, dirs, files in os.walk(cls.PASS_DIR, topdown=True):
             if not root.startswith(os.path.join(cls.PASS_DIR, '.git')):
                 dirs = [os.path.join('', d) for d in dirs if d != '.git']
                 files = [file.rstrip('.gpg') for file in files if file.endswith('.gpg')]
-                relroot = os.path.normpath(os.path.join('', os.path.relpath(root, cls.PASS_DIR)))
+                relroot = os.path.normpath(os.path.relpath(root, cls.PASS_DIR))
                 if relroot == '.':
                     relroot = ''
                 dir_contents[relroot] = Directory(relroot, dirs, files)
