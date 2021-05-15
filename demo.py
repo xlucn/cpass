@@ -141,8 +141,8 @@ class PassList(urwid.ListBox):
 class Directory():
     def __init__(self, root, dirs, files):
         self.root = root
-        self.dirs = dirs
-        self.files = files
+        self.dirs = sorted(dirs)
+        self.files = sorted(files)
         self.pos = 0
 
     def contents(self):
