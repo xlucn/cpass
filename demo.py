@@ -168,7 +168,8 @@ class UI(urwid.Frame):
             self.middle = urwid.Pile([self.listbox, ('pack', self.divider), self.preview])
 
         # update upon list operations
-        urwid.connect_signal(self.walker, 'modified', self.update_view)
+        urwid.register_signal(PassList, ['update_view'])
+        urwid.connect_signal(self.listbox, 'update_view', self.update_view)
         super().__init__(self.middle, self.header_widget, self.footer_widget, focus_part='body')
 
     def update_view(self):
