@@ -6,7 +6,7 @@ from subprocess import run, PIPE
 
 def debug(message):
     if os.getenv('DEBUG'):
-        open('log', 'a').write(message + '\n')
+        open('log', 'a').write(message.rstrip('\n') + '\n')
 
 
 class SelectableText(urwid.Text):
@@ -37,6 +37,7 @@ class SearchBox(urwid.Edit):
             passui.set_focus('body')
             return None
         elif key in ['enter']:
+            # dummy search
             return None
 
         return super().keypress(size, key)
@@ -95,12 +96,14 @@ class PassList(urwid.ListBox):
         elif key in dir_navigations:
             self.dir_navigate(dir_navigations[key])
         elif key in ['d']:
+            # dummy delete
             if len(self.body) > 0:
                 self.body.pop(self.focus_position)
         elif key in ['a']:
+            # dummy add
             self.body.insert(self.focus_position, PassNode('foonew'))
         elif key in ['/']:
-            passui.contents['footer'] = (passui.edit, None)
+            passui.contents['footer'] = (passui.searchbox, None)
             passui.set_focus('footer')
         else:
             return super().keypress(size, key)
@@ -151,12 +154,12 @@ class Directory():
 class UI(urwid.Frame):
     def __init__(self):
         self._last_preview = None
-        self.app_string = 'Pass tui'
+        self._app_string = 'Pass tui'
         self.header_widget = urwid.AttrMap(urwid.Text(''), 'border')
         self.footer_widget = urwid.AttrMap(urwid.Text('', align='right'), 'border')
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
-        self.edit = SearchBox("/")
+        self.searchbox = SearchBox("/")
 
         self.walker = urwid.SimpleListWalker([
             PassNode(directory) for directory in allnodes[''].contents()
@@ -195,12 +198,11 @@ class UI(urwid.Frame):
         else:
             preview = Pass.show(node)
             debug("password: " + preview)
-            debug("list length: {}".format(len(self.listbox.body)))
         self.preview.original_widget.set_text(preview)
         self._last_preview = node
 
         self.contents['header'][0].original_widget.set_text('{}: {}'.format(
-            self.app_string,
+            self._app_string,
             os.path.join(Pass.PASS_DIR, self.listbox.root)
         ))
         self.contents['footer'][0].original_widget.set_text("{}/{}".format(
