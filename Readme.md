@@ -29,7 +29,7 @@ Make sure you are using a local password store compatible with [`pass`](https://
 
 Basic common keybindings just work as you would use in a lot of other programs:
 
-`h`, `j`, `k`, `l`, `g`, `G`, `ctrl+d`, `ctrl+u`, `ctrl+f`, `ctrl+b`, `ctrl+y`, `ctrl+e`, `ctrl+n`, `ctrl+p`
+`h`, `j`, `k`, `l`, `g`, `G`, `ctrl+d`, `ctrl+u`, `ctrl+f`, `ctrl+b`, `ctrl+n`, `ctrl+p`
 
 For `pass` related operations (mostly todo):
 
