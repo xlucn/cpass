@@ -193,7 +193,7 @@ class UI(urwid.Frame):
         if text in allnodes[self.listbox.root].dirs:
             preview = "\n".join(allnodes[node].contents())
         else:
-            preview = password_store.show(node)
+            preview = Pass.show(node)
             debug("password: " + preview)
             debug("list length: {}".format(len(self.listbox.body)))
         self.preview.original_widget.set_text(preview)
@@ -201,7 +201,7 @@ class UI(urwid.Frame):
 
         self.contents['header'][0].original_widget.set_text('{}: {}'.format(
             self.app_string,
-            os.path.join(password_store.PASS_DIR, self.listbox.root)
+            os.path.join(Pass.PASS_DIR, self.listbox.root)
         ))
         self.contents['footer'][0].original_widget.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
@@ -209,27 +209,34 @@ class UI(urwid.Frame):
         ))
 
 
-class Pass():
-    """ pass operations """
-    def __init__(self):
-        FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
-        self.PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
+class Pass:
+    FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
+    PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
 
-    def extract_all(self):
+    @classmethod
+    def store_dir(cls):
+        return cls.PASS_DIR
+
+    @classmethod
+    def extract_all(cls):
+        """ pass operations """
+
         dir_contents = {}
-        for root, dirs, files in os.walk(self.PASS_DIR, topdown=True):
-            if not root.startswith(os.path.join(self.PASS_DIR, '.git')):
+        for root, dirs, files in os.walk(cls.PASS_DIR, topdown=True):
+            if not root.startswith(os.path.join(cls.PASS_DIR, '.git')):
                 dirs = [os.path.join('', d) for d in dirs if d != '.git']
                 files = [file.rstrip('.gpg') for file in files if file.endswith('.gpg')]
-                relroot = os.path.normpath(os.path.join('', os.path.relpath(root, self.PASS_DIR)))
+                relroot = os.path.normpath(os.path.join('', os.path.relpath(root, cls.PASS_DIR)))
                 if relroot == '.':
                     relroot = ''
                 dir_contents[relroot] = Directory(relroot, dirs, files)
         return dir_contents
 
-    def show(self, node):
+    @staticmethod
+    def show(node):
         result = run(['pass', 'show', node], stdout=PIPE, stderr=PIPE, text=True)
         return result.stderr if result.returncode else result.stdout
+
 
 def unhandled_input(key):
     if key in ['q', 'Q']:
@@ -240,9 +247,7 @@ def unhandled_input(key):
 if __name__ == '__main__':
     arg_preview = 'side'
 
-    # pass backend
-    password_store = Pass()
-    allnodes = password_store.extract_all()
+    allnodes = Pass.extract_all()
 
     # UI
     passui = UI()
