@@ -98,8 +98,11 @@ class PassList(urwid.ListBox):
             # dummy delete
             if len(self.body) > 0:
                 self.body.pop(self.focus_position)
-        elif key in ['a']:
+        elif key in ['a', 'i']:
             # dummy add
+            self.body.insert(self.focus_position, PassNode('foonew'))
+        elif key in ['A', 'I']:
+            # dummy generate
             self.body.insert(self.focus_position, PassNode('foonew'))
         elif key in ['/']:
             passui.contents['footer'] = (passui.searchbox, None)
