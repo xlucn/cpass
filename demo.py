@@ -184,13 +184,6 @@ class UI(urwid.Frame):
         node = os.path.join(self.listbox.root, text)
 
         if node == self._last_preview:
-            # don't update if the node does not change
-            # still problematic due to I am using listbox.keypress() to navigate, what urwid
-            # is doing under the ground might trigger this function multiple times when there
-            # is no need. investigation is required, otherwise the navigation need to be
-            # impletemented manually in a low level.
-            # I intended not to have this code, since this does not solve all problems
-            # at once
             return
 
         if text in allnodes[self.listbox.root].dirs:
