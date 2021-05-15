@@ -86,8 +86,8 @@ class PassList(urwid.ListBox):
         dir_navigations = {
             'l':     'down',
             'h':     'up',
-            'right': 'up',
-            'left':  'down',
+            'right': 'down',
+            'left':  'up',
             'enter': 'up',
         }
         if key in list_navigations:
