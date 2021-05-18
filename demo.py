@@ -113,6 +113,9 @@ class PassList(urwid.ListBox):
             return super().keypress(size, key)
 
     def dir_navigate(self, direction):
+        debug("body length: {}".format(len(self.body)))
+        if self.body is None or len(self.body) == 0:
+            return
         # record current position
         self._all_pass[self.root].pos = self.focus_position
         if direction in 'down':
@@ -126,7 +129,7 @@ class PassList(urwid.ListBox):
         urwid.emit_signal(self, 'update_view')
 
     def list_navigate(self, size, shift):
-        if len(self.body) == 0:
+        if self.body is None or len(self.body) == 0:
             return
         offset = self.get_focus_offset_inset(size)[0]
         new_focus = self.focus_position + shift
@@ -181,7 +184,7 @@ class UI(urwid.Frame):
         super().__init__(self.middle, self.header_widget, self.footer_widget, focus_part='body')
 
     def update_view(self):
-        if self.listbox.focus is None:
+        if self.listbox.body is None or len(self.listbox.body) == 0:
             self.footer.original_widget.set_text("0/0")
             return
 
