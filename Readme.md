@@ -25,6 +25,8 @@ Make sure you are using a local password store compatible with [`pass`](https://
 
 ### Start `cpass`
 
+To be determined.
+
 ### Keybindings
 
 Basic common keybindings just work as you would use in a lot of other programs:
@@ -36,7 +38,11 @@ For `pass` related operations (mostly todo):
 - `d` will delete current password file or directory after user confirms
 - `a` or `i` will add a new password in current directory
 - `A` or `I` will generate a new password in current directory
+- `c` or `e` edit current password
 - `/` will start a search
+- `z` toggle preview
+- `D`, `Y`, `P` remove, copy and paste item
+- `y` + `y/G/a/[0-9]` copy contents in password
 
 ### Mouse
 
