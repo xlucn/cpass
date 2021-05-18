@@ -2,6 +2,8 @@
 
 [`pass`](https://www.passwordstore.org/) is the standard unix password manager. This program `cpass` is a [urwid](http://urwid.org/) based terminal user interface (TUI) for that password manager with mouse support and vim-like keybindings.
 
+`cpass` tries to achieve a minimal, clean interface and utilizes vim-like keybinding. Also, thanks to the urwid module, mouse is supported very well.
+
 ## Features:
 
 - browse local password store
@@ -20,8 +22,6 @@
 ## Usage:
 
 Make sure you are using a local password store compatible with [`pass`](https://www.passwordstore.org/), `cpass` will look in `$PASSWORD_STORE_DIR`, otherwise in `~/.password_store/`. `pass` is also required, although theoretically a `pass` compatible client does not need `pass` command (e.g., [qtpass](https://qtpass.org/) can work with `git` and `gpg`).
-
-`cpass` tries to achieve a minimal, clean interface and utilizes vim-like keybinding. Also, thanks to the urwid module, mouse is supported very well.
 
 ### Start `cpass`
 
