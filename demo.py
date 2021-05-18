@@ -169,7 +169,7 @@ class UI(urwid.Frame):
         self.walker = urwid.SimpleListWalker([
             PassNode(directory) for directory in self._all_pass[''].contents()
         ])
-        self.listbox = PassList(self.walker)
+        self.listbox = PassList(self.walker, allpass=allpass)
         if arg_preview in ['side', 'horizontal']:
             self.middle = urwid.Columns([self.listbox, self.preview], dividechars=1)
         elif arg_preview in ['bottom', 'vertical']:
