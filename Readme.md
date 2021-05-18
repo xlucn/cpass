@@ -1,6 +1,6 @@
 # cpass: another console UI for pass
 
-[`pass`](https://www.passwordstore.org/) is the standard unix password manager. This program `cpass` is a [urwid](http://urwid.org/) based terminal user interface (TUI) for that password manager with mouse support and vim-like keybindings.
+[`pass`](https://www.passwordstore.org/) is the standard unix password manager. This program `cpass` is an [urwid](http://urwid.org/) based terminal user interface (TUI) for that password manager with mouse support and vim-like keybindings.
 
 `cpass` tries to achieve a minimal, clean interface and utilizes vim-like keybinding. Also, thanks to the urwid module, mouse is supported very well.
 
@@ -33,7 +33,7 @@ Basic common keybindings just work as you would use in a lot of other programs:
 
 `h`, `j`, `k`, `l`, `g`, `G`, `ctrl+d`, `ctrl+u`, `ctrl+f`, `ctrl+b`, `ctrl+n`, `ctrl+p`
 
-For `pass` related operations (mostly todo):
+For `pass` related operations (mostly to-do):
 
 - `d` will delete current password file or directory after user confirms
 - `a` or `i` will add a new password in current directory
@@ -49,5 +49,5 @@ For `pass` related operations (mostly todo):
 This is very intuitive.
 
 - Scroll to navigate up and down in the current list.
-- Left click on the current highlighted item will open it, while left click on other items will highlight it.
-- Right click will go to the parent folder.
+- Left-click on the current highlighted item will open it, while left click on other items will highlight it.
+- Right-click will go to the parent folder.
