@@ -23,11 +23,11 @@ class SelectableText(urwid.Text):
 
 
 class PassNode(urwid.AttrMap):
-    # TODO: directory mark '/'
     # TODO: children count
-    def __init__(self, text):
+    def __init__(self, text, isdir=False):
+        text = ("/" if isdir else " ") + text
         super().__init__(SelectableText(text), '',  'focus')
-        self.node = self.original_widget.text
+        self.node = self.original_widget.text[1:]
 
 
 class SearchBox(urwid.Edit):
@@ -124,7 +124,8 @@ class PassList(urwid.ListBox):
         elif direction in 'up':
             self.root = os.path.dirname(self.root)
         # this way the list itself is not replaced, same down there
-        self.body[:] = [PassNode(node) for node in self._all_pass[self.root].contents()]
+        self.body[:] = [PassNode(node, True) for node in self._all_pass[self.root].dirs] + \
+                       [PassNode(node) for node in self._all_pass[self.root].files]
         self.focus_position = self._all_pass[self.root].pos
         urwid.emit_signal(self, 'update_view')
 
@@ -169,9 +170,10 @@ class UI(urwid.Frame):
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.searchbox = SearchBox("/")
 
-        self.walker = urwid.SimpleListWalker([
-            PassNode(directory) for directory in self._all_pass[''].contents()
-        ])
+        self.walker = urwid.SimpleListWalker(
+            [PassNode(d, True) for d in self._all_pass[''].dirs] +
+            [PassNode(f) for f in self._all_pass[''].files]
+        )
         self.listbox = PassList(self.walker, allpass=allpass)
         if arg_preview in ['side', 'horizontal']:
             self.middle = urwid.Columns([self.listbox, self.preview], dividechars=1)
