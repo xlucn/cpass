@@ -107,7 +107,7 @@ class PassList(urwid.ListBox):
             'h':     'up',
             'right': 'down',
             'left':  'up',
-            'enter': 'up',
+            'enter': 'down',
         }
         if key in list_navigations:
             self.list_navigate(size, list_navigations[key])
