@@ -25,8 +25,12 @@ class SelectableText(urwid.Text):
 class PassNode(urwid.AttrMap):
     # TODO: children count
     def __init__(self, text, isdir=False):
-        text = ("/" if isdir else " ") + text
-        super().__init__(SelectableText(text), '',  'focus')
+        if isdir:
+            text = "/" + text
+            super().__init__(SelectableText(text), 'dir', 'focusdir')
+        else:
+            text = " " + text
+            super().__init__(SelectableText(text), '',  'focus')
         self.node = self.original_widget.text[1:]
 
 
@@ -254,9 +258,11 @@ if __name__ == '__main__':
 
     # main loop
     loop = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=[
-        # name          fg              bg              styles
-        ('focus',       'black',        'dark cyan',    'standout'),
+        # name          fg              bg
         ('border',      'light cyan',   'default'),
+        ('dir',         'light green',  'default'),
+        ('focus',       'black',        'white'),
+        ('focusdir',    'black, bold',  'light green'),
     ])
     # set no timeout after escape key
     loop.screen.set_input_timeouts(complete_wait=0)
