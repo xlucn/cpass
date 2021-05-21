@@ -56,11 +56,24 @@ class PassList(urwid.ListBox):
         super().__init__(body)
 
     def mouse_event(self, size, event, button, col, row, focus):
-        debug("passlist mouse event: {} {} {} {} {} {} {}".format(
-            size, event, button, col, row, focus, self.focus_position
+        focus_offset = self.get_focus_offset_inset(size)[0]
+        debug("passlist mouse event: {} {} {} {} {} {} {} {}".format(
+            size, event, button, col, row, focus, self.focus_position, focus_offset
         ))
-        if button in [1] and row == self.focus_position:
-            self.dir_navigate('down')
+        if button in [1]:
+            if size[1] > len(self.body):
+                # NOTE: offset is wrong(?) when size is larger than length
+                # so the processing is different
+                if row == self.focus_position:
+                    self.dir_navigate('down')
+                else:
+                    self.list_navigate(size, to=row)
+            else:
+                if row == focus_offset:
+                    self.dir_navigate('down')
+                else:
+                    self.list_navigate(size, to=self.focus_position - focus_offset + row)
+                # super().mouse_event(size, event, button, col, row, focus)
         elif button in [3]:
             self.dir_navigate('up')
         elif button in [4]:
@@ -127,17 +140,21 @@ class PassList(urwid.ListBox):
                 self.root = os.path.join(self.root, self.focus.node)
         elif direction in 'up':
             self.root = os.path.dirname(self.root)
-        # this way the list itself is not replaced, same down there
+        # this way the list itself is not replaced
         self.body[:] = [PassNode(node, True) for node in self._all_pass[self.root].dirs] + \
                        [PassNode(node) for node in self._all_pass[self.root].files]
         self.focus_position = self._all_pass[self.root].pos
         urwid.emit_signal(self, 'update_view')
 
-    def list_navigate(self, size, shift):
+    def list_navigate(self, size, shift=0, to=None):
         if self.body is None or len(self.body) == 0:
             return
         offset = self.get_focus_offset_inset(size)[0]
-        new_focus = self.focus_position + shift
+        if to is None:
+            new_focus = self.focus_position + shift
+        else:
+            new_focus = to
+            shift = to - self.focus_position
         new_offset = offset + shift
         # border check
         if new_focus < 0:
