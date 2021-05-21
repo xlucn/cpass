@@ -201,7 +201,8 @@ class UI(urwid.Frame):
             return
 
         if text in self._all_pass[self.listbox.root].dirs:
-            preview = "\n".join(self._all_pass[node].contents())
+            preview = "\n".join(['/' + d for d in self._all_pass[node].dirs]) + \
+                      "\n".join([' ' + f for f in self._all_pass[node].files])
         else:
             preview = Pass.show(node)
             debug("password: " + preview)
