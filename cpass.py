@@ -34,12 +34,11 @@ class SearchBox(urwid.Edit):
             self.set_edit_text('')
             passui.contents['footer'] = (passui.footer_widget, None)
             passui.set_focus('body')
-            return None
         elif key in ['enter']:
             # dummy search
-            return None
-
-        return super().keypress(size, key)
+            pass
+        else:
+            return super().keypress(size, key)
 
 
 class PassList(urwid.ListBox):
