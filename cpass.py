@@ -80,6 +80,8 @@ class PassList(urwid.ListBox):
         list_navigations = {
             'j': 1,
             'k': -1,
+            'down': 1,
+            'up': -1,
             'ctrl n': 1,
             'ctrl p': -1,
             'ctrl f': size[1],
