@@ -214,14 +214,16 @@ class UI(urwid.Frame):
             ('bright', self.listbox.root),
         ])
 
+        if self.listbox.focus.node is None:
+            self.indicator.original_widget.set_text("0/0")
+            self.preview.original_widget.set_text('')
+            return
+
         self.indicator.original_widget.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
             len(self.listbox.body)
         ))
 
-        if self.listbox.focus.node is None:
-            self.preview.original_widget.set_text('')
-            return
         text = self.listbox.focus.node
         node = os.path.join(self.listbox.root, text)
 
