@@ -42,9 +42,10 @@ class SearchBox(urwid.Edit):
 
 
 class PassList(urwid.ListBox):
-    def __init__(self, body, root=None, allpass=None):
+    def __init__(self, body, root=None, allpass=None, ui=None):
         self.root = root if root else ''
         self._all_pass = allpass
+        self._ui = ui
         super().__init__(body)
 
     def mouse_event(self, size, event, button, col, row, focus):
@@ -137,8 +138,8 @@ class PassList(urwid.ListBox):
         # this way the list itself is not replaced
         self.body[:] = [PassNode(node, True) for node in self._all_pass[self.root].dirs] + \
                        [PassNode(node) for node in self._all_pass[self.root].files]
+        self._ui.update_view()
         self.focus_position = self._all_pass[self.root].pos
-        urwid.emit_signal(self, 'update_view')
 
     def list_navigate(self, size, shift=0, to=None):
         if self.body is None or len(self.body) == 0:
@@ -160,7 +161,7 @@ class PassList(urwid.ListBox):
         elif new_offset > size[1] - 1:
             new_offset = size[1] - 1
         self.change_focus(size, new_focus, offset_inset=new_offset)
-        urwid.emit_signal(self, 'update_view')
+        self._ui.update_view()
 
 
 class Directory():
@@ -189,15 +190,12 @@ class UI(urwid.Frame):
             [PassNode(d, True) for d in self._all_pass[''].dirs] +
             [PassNode(f) for f in self._all_pass[''].files]
         )
-        self.listbox = PassList(self.walker, allpass=allpass)
+        self.listbox = PassList(self.walker, allpass=allpass, ui=self)
         if arg_preview in ['side', 'horizontal']:
             self.middle = urwid.Columns([self.listbox, self.preview], dividechars=1)
         elif arg_preview in ['bottom', 'vertical']:
             self.middle = urwid.Pile([self.listbox, ('pack', self.divider), self.preview])
 
-        # update upon list operations
-        urwid.register_signal(PassList, ['update_view'])
-        urwid.connect_signal(self.listbox, 'update_view', self.update_view)
         super().__init__(self.middle, self.header_widget, self.footer_widget, focus_part='body')
 
     def update_view(self):
