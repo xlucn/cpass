@@ -138,8 +138,8 @@ class PassList(urwid.ListBox):
             self.root = os.path.dirname(self.root)
         # this way the list itself is not replaced
         self.body[:] = self._all_pass[self.root].nodelist()
-        self._ui.update_view()
         self.focus_position = self._all_pass[self.root].pos
+        self._ui.update_view()
 
     def list_navigate(self, size, shift=0, to=None):
         offset = self.get_focus_offset_inset(size)[0]
