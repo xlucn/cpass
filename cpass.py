@@ -12,6 +12,7 @@ def debug(message):
 
 class PassNode(urwid.AttrMap):
     def __init__(self, text, isdir=False, isempty=False):
+        self._selectable = True
         if isempty:
             self.node = None
             super().__init__(urwid.Text(text, wrap='clip'), 'bright', 'bright')
@@ -21,10 +22,6 @@ class PassNode(urwid.AttrMap):
             normal = 'dir' if isdir else ''
             focused = 'focusdir' if isdir else 'focus'
             super().__init__(urwid.Text(text, wrap='clip'), normal, focused)
-
-    def selectable(self):
-        """ make the widget selectable for navigating """
-        return True
 
     def keypress(self, size, key):
         """ let the widget pass through the keys to parent widget """
