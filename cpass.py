@@ -152,14 +152,8 @@ class PassList(urwid.ListBox):
             shift = to - self.focus_position
         new_offset = offset + shift
         # border check
-        if new_focus < 0:
-            new_focus = 0
-        elif new_focus > len(self.body) - 1:
-            new_focus = len(self.body) - 1
-        if new_offset < 0:
-            new_offset = 0
-        elif new_offset > size[1] - 1:
-            new_offset = size[1] - 1
+        new_focus = min(max(new_focus, 0), len(self.body) - 1)
+        new_offset = min(max(new_offset, 0), size[1] - 1)
         self.change_focus(size, new_focus, offset_inset=new_offset)
         self._ui.update_view()
 
