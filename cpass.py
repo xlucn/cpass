@@ -197,6 +197,10 @@ class UI(urwid.Frame):
         super().__init__(self.middle, self.header_widget, self.footer_widget)
 
     def update_view(self):
+        self.contents['header'][0].original_widget.set_text('{}: {}'.format(
+            self._app_string,
+            os.path.join(Pass.PASS_DIR, self.listbox.root)
+        ))
         if self.listbox.body is None or len(self.listbox.body) == 0:
             self.indicator.original_widget.set_text("0/0")
             return
@@ -211,20 +215,14 @@ class UI(urwid.Frame):
 
         if node == self._last_preview:
             return
+        self._last_preview = node
 
         if text in self._all_pass[self.listbox.root].dirs:
             preview = "\n".join(['/' + d for d in self._all_pass[node].dirs]) + \
                       "\n".join([' ' + f for f in self._all_pass[node].files])
         else:
             preview = Pass.show(node)
-            debug("password: " + preview)
         self.preview.original_widget.set_text(preview)
-        self._last_preview = node
-
-        self.contents['header'][0].original_widget.set_text('{}: {}'.format(
-            self._app_string,
-            os.path.join(Pass.PASS_DIR, self.listbox.root)
-        ))
 
 
 class Pass:
