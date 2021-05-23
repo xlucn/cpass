@@ -137,8 +137,7 @@ class PassList(urwid.ListBox):
         elif direction in 'up':
             self.root = os.path.dirname(self.root)
         # this way the list itself is not replaced
-        self.body[:] = [PassNode(node, True) for node in self._all_pass[self.root].dirs] + \
-                       [PassNode(node) for node in self._all_pass[self.root].files]
+        self.body[:] = self._all_pass[self.root].nodelist()
         self._ui.update_view()
         self.focus_position = self._all_pass[self.root].pos
 
@@ -165,15 +164,15 @@ class PassList(urwid.ListBox):
         self._ui.update_view()
 
 
-class Directory():
+class Directory:
     def __init__(self, root, dirs, files):
         self.root = root
         self.dirs = sorted(dirs)
         self.files = sorted(files)
-        self.pos = 0
+        self.pos = 0  # cursor position
 
-    def contents(self):
-        return self.dirs + self.files
+    def nodelist(self):
+        return [PassNode(d, True) for d in self.dirs] + [PassNode(f) for f in self.files]
 
 
 class UI(urwid.Frame):
@@ -189,10 +188,7 @@ class UI(urwid.Frame):
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.searchbox = SearchBox("/")
 
-        self.walker = urwid.SimpleListWalker(
-            [PassNode(d, True) for d in self._all_pass[''].dirs] +
-            [PassNode(f) for f in self._all_pass[''].files]
-        )
+        self.walker = urwid.SimpleListWalker(self._all_pass[''].nodelist())
         self.listbox = PassList(self.walker, allpass=allpass, ui=self)
         if arg_preview in ['side', 'horizontal']:
             self.middle = urwid.Columns([self.listbox, self.preview], dividechars=1)
