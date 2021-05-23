@@ -265,11 +265,11 @@ if __name__ == '__main__':
 
     # main loop
     loop = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=[
-        # name          fg              bg
+        # name          fg              bg              style
         ('border',      'light cyan',   'default'),
         ('dir',         'light green',  'default'),
         ('focus',       'black',        'white'),
-        ('focusdir',    'black, bold',  'light green'),
+        ('focusdir',    'black',        'light green',  'bold'),
     ])
     # set no timeout after escape key
     loop.screen.set_input_timeouts(complete_wait=0)
