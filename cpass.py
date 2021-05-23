@@ -9,29 +9,21 @@ def debug(message):
         open('log', 'a').write(message.rstrip('\n') + '\n')
 
 
-class SelectableText(urwid.Text):
-    def __init__(self, markup):
-        super().__init__(markup, wrap='clip')
+class PassNode(urwid.AttrMap):
+    def __init__(self, text, isdir=False):
+        self.node = text
+        text = ('/' if isdir else ' ') + text
+        normal = 'dir' if isdir else ''
+        focused = 'focusdir' if isdir else 'focus'
+        super().__init__(urwid.Text(text, wrap='clip'), normal, focused)
 
     def selectable(self):
         """ make the widget selectable for navigating """
         return True
 
     def keypress(self, size, key):
-        """ let the widget pass through the keys """
+        """ let the widget pass through the keys to parent widget """
         return key
-
-
-class PassNode(urwid.AttrMap):
-    # TODO: children count
-    def __init__(self, text, isdir=False):
-        if isdir:
-            text = "/" + text
-            super().__init__(SelectableText(text), 'dir', 'focusdir')
-        else:
-            text = " " + text
-            super().__init__(SelectableText(text), '',  'focus')
-        self.node = self.original_widget.text[1:]
 
 
 class SearchBox(urwid.Edit):
