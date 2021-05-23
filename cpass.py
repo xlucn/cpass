@@ -264,9 +264,8 @@ class Pass:
 
 
 def unhandled_input(key):
-    if key in ['q', 'Q']:
-        raise urwid.ExitMainLoop()
-    return True
+    if key == 'q':
+        raise urwid.ExitMainLoop
 
 
 if __name__ == '__main__':
