@@ -66,7 +66,6 @@ class PassList(urwid.ListBox):
                     self.dir_navigate('down')
                 else:
                     self.list_navigate(size, to=self.focus_position - focus_offset + row)
-                # super().mouse_event(size, event, button, col, row, focus)
         elif button in [3]:
             self.dir_navigate('up')
         elif button in [4]:
@@ -177,7 +176,7 @@ class Directory:
 class UI(urwid.Frame):
     def __init__(self, allpass=None):
         self._last_preview = None
-        self._app_string = 'Pass tui'
+        self._app_string = 'cPass'
         self._all_pass = allpass
         self.header_widget = urwid.AttrMap(urwid.Text(''), 'border')
         self.messagebox = urwid.Text('')
