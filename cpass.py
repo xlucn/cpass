@@ -7,6 +7,7 @@ from subprocess import run, PIPE
 def debug(message):
     if os.getenv('DEBUG'):
         open('log', 'a').write(message.rstrip('\n') + '\n')
+        passui.messagebox.set_text(message)
 
 
 class PassNode(urwid.AttrMap):
@@ -181,7 +182,9 @@ class UI(urwid.Frame):
         self._app_string = 'Pass tui'
         self._all_pass = allpass
         self.header_widget = urwid.AttrMap(urwid.Text(''), 'border')
-        self.footer_widget = urwid.AttrMap(urwid.Text('', align='right'), 'border')
+        self.messagebox = urwid.Text('')
+        self.indicator = urwid.AttrMap(urwid.Text('', align='right'), 'border')
+        self.footer_widget = urwid.Columns([self.messagebox, ('pack', self.indicator)])
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.searchbox = SearchBox("/")
@@ -196,12 +199,17 @@ class UI(urwid.Frame):
         elif arg_preview in ['bottom', 'vertical']:
             self.middle = urwid.Pile([self.listbox, ('pack', self.divider), self.preview])
 
-        super().__init__(self.middle, self.header_widget, self.footer_widget, focus_part='body')
+        super().__init__(self.middle, self.header_widget, self.footer_widget)
 
     def update_view(self):
         if self.listbox.body is None or len(self.listbox.body) == 0:
-            self.footer.original_widget.set_text("0/0")
+            self.indicator.original_widget.set_text("0/0")
             return
+
+        self.indicator.original_widget.set_text("{}/{}".format(
+            self.listbox.focus_position + 1,
+            len(self.listbox.body)
+        ))
 
         text = self.listbox.focus.node
         node = os.path.join(self.listbox.root, text)
@@ -221,10 +229,6 @@ class UI(urwid.Frame):
         self.contents['header'][0].original_widget.set_text('{}: {}'.format(
             self._app_string,
             os.path.join(Pass.PASS_DIR, self.listbox.root)
-        ))
-        self.contents['footer'][0].original_widget.set_text("{}/{}".format(
-            self.listbox.focus_position + 1,
-            len(self.listbox.body)
         ))
 
 
