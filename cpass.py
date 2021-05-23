@@ -11,12 +11,16 @@ def debug(message):
 
 
 class PassNode(urwid.AttrMap):
-    def __init__(self, text, isdir=False):
-        self.node = text
-        text = ('/' if isdir else ' ') + text
-        normal = 'dir' if isdir else ''
-        focused = 'focusdir' if isdir else 'focus'
-        super().__init__(urwid.Text(text, wrap='clip'), normal, focused)
+    def __init__(self, text, isdir=False, isempty=False):
+        if isempty:
+            self.node = None
+            super().__init__(urwid.Text(text, wrap='clip'), 'bright', 'bright')
+        else:
+            self.node = text
+            text = ('/' if isdir else ' ') + text
+            normal = 'dir' if isdir else ''
+            focused = 'focusdir' if isdir else 'focus'
+            super().__init__(urwid.Text(text, wrap='clip'), normal, focused)
 
     def selectable(self):
         """ make the widget selectable for navigating """
@@ -125,8 +129,6 @@ class PassList(urwid.ListBox):
 
     def dir_navigate(self, direction):
         debug("body length: {}".format(len(self.body)))
-        if self.body is None or len(self.body) == 0:
-            return
         # record current position
         self._all_pass[self.root].pos = self.focus_position
         if direction in 'down':
@@ -140,8 +142,6 @@ class PassList(urwid.ListBox):
         self.focus_position = self._all_pass[self.root].pos
 
     def list_navigate(self, size, shift=0, to=None):
-        if self.body is None or len(self.body) == 0:
-            return
         offset = self.get_focus_offset_inset(size)[0]
         if to is None:
             new_focus = self.focus_position + shift
@@ -170,7 +170,11 @@ class Directory:
         self.pos = 0  # cursor position
 
     def nodelist(self):
-        return [PassNode(d, True) for d in self.dirs] + [PassNode(f) for f in self.files]
+        if len(self.dirs) > 0 or len(self.files) > 0:
+            return [PassNode(d, isdir=True) for d in self.dirs] + \
+                   [PassNode(f) for f in self.files]
+        else:
+            return [PassNode("-- EMPTY --", isempty=True)]
 
 
 class UI(urwid.Frame):
@@ -206,15 +210,15 @@ class UI(urwid.Frame):
             self._app_string,
             os.path.join(Pass.PASS_DIR, self.listbox.root)
         ))
-        if self.listbox.body is None or len(self.listbox.body) == 0:
-            self.indicator.original_widget.set_text("0/0")
-            return
 
         self.indicator.original_widget.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
             len(self.listbox.body)
         ))
 
+        if self.listbox.focus.node is None:
+            self.preview.original_widget.set_text('')
+            return
         text = self.listbox.focus.node
         node = os.path.join(self.listbox.root, text)
 
@@ -274,6 +278,7 @@ if __name__ == '__main__':
         ('border',      'light cyan',   'default'),
         ('dir',         'light green',  'default'),
         ('alert',       'light red',    'default'),
+        ('bright',      'white',        'default'),
         ('focus',       'black',        'white'),
         ('focusdir',    'black',        'light green',  'bold'),
     ])
