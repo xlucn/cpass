@@ -182,7 +182,7 @@ class UI(urwid.Frame):
         self._last_preview = None
         self._app_string = 'cPass'
         self._all_pass = allpass
-        self.header_widget = urwid.AttrMap(urwid.Text(''), 'border')
+        self.header_widget = urwid.Text('')
         self.messagebox = urwid.Text('')
         self.indicator = urwid.AttrMap(urwid.Text('', align='right'), 'border')
         self.footer_widget = urwid.Columns([self.messagebox, ('pack', self.indicator)])
@@ -206,10 +206,11 @@ class UI(urwid.Frame):
             self.messagebox.set_text(message)
 
     def update_view(self):
-        self.contents['header'][0].original_widget.set_text('{}: {}'.format(
-            self._app_string,
-            os.path.join(Pass.PASS_DIR, self.listbox.root)
-        ))
+        self.header_widget.set_text([
+            ('border', '{}: '.format(self._app_string)),
+            ('dir', '{}/'.format(Pass.PASS_DIR)),
+            ('bright', self.listbox.root),
+        ])
 
         self.indicator.original_widget.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
