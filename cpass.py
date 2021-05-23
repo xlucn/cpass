@@ -7,7 +7,7 @@ from subprocess import run, PIPE
 def debug(message):
     if os.getenv('DEBUG'):
         open('log', 'a').write(message.rstrip('\n') + '\n')
-        passui.messagebox.set_text(message)
+        passui.message(message)
 
 
 class PassNode(urwid.AttrMap):
@@ -195,6 +195,12 @@ class UI(urwid.Frame):
 
         super().__init__(self.middle, self.header_widget, self.footer_widget)
 
+    def message(self, message, alert=False):
+        if alert:
+            self.messagebox.set_text(('alert', message))
+        else:
+            self.messagebox.set_text(message)
+
     def update_view(self):
         self.contents['header'][0].original_widget.set_text('{}: {}'.format(
             self._app_string,
@@ -267,6 +273,7 @@ if __name__ == '__main__':
         # name          fg              bg              style
         ('border',      'light cyan',   'default'),
         ('dir',         'light green',  'default'),
+        ('alert',       'light red',    'default'),
         ('focus',       'black',        'white'),
         ('focusdir',    'black',        'light green',  'bold'),
     ])
