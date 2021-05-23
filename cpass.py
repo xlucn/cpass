@@ -124,6 +124,8 @@ class PassList(urwid.ListBox):
         elif key in ['/']:
             passui.contents['footer'] = (passui.searchbox, None)
             passui.set_focus('footer')
+        elif key in ['esc']:
+            passui.messagebox.set_text('')
         else:
             return super().keypress(size, key)
 
