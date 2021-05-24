@@ -168,8 +168,11 @@ class UI(urwid.Frame):
         self._preview_shown = True
         self.header_widget = urwid.Text('')
         self.messagebox = urwid.Text('')
-        self.indicator = urwid.AttrMap(urwid.Text('', align='right'), 'border')
-        self.footer_widget = urwid.Columns([self.messagebox, ('pack', self.indicator)])
+        self.indicator = urwid.Text('', align='right')
+        self.footer_widget = urwid.Columns([
+            self.messagebox,
+            ('pack', urwid.AttrMap(self.indicator, 'border'))
+        ])
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.searchbox = urwid.Edit("/")
@@ -230,11 +233,11 @@ class UI(urwid.Frame):
         ])
 
         if self.listbox.focus.node is None:
-            self.indicator.original_widget.set_text("0/0")
+            self.indicator.set_text("0/0")
             self.preview.original_widget.set_text('')
             return
 
-        self.indicator.original_widget.set_text("{}/{}".format(
+        self.indicator.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
             len(self.listbox.body)
         ))
