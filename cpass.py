@@ -242,6 +242,9 @@ class UI(urwid.Frame):
         text = self.listbox.focus.node
         node = os.path.join(self.listbox.root, text)
 
+        if not self._preview_shown:
+            return
+
         if node == self._last_preview:
             return
         self._last_preview = node
