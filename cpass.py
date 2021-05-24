@@ -165,6 +165,7 @@ class UI(urwid.Frame):
         self._last_preview = None
         self._app_string = 'cPass'
         self._all_pass = allpass
+        self._preview_shown = True
         self.header_widget = urwid.Text('')
         self.messagebox = urwid.Text('')
         self.indicator = urwid.AttrMap(urwid.Text('', align='right'), 'border')
@@ -175,15 +176,30 @@ class UI(urwid.Frame):
 
         self.walker = urwid.SimpleListWalker(self._all_pass[''].nodelist())
         self.listbox = PassList(self.walker, allpass=allpass, ui=self)
+
         if arg_preview in ['side', 'horizontal']:
-            self.middle = urwid.Columns([self.listbox, self.preview], dividechars=1)
+            self.middle = urwid.Columns([], dividechars=1)
         elif arg_preview in ['bottom', 'vertical']:
-            self.middle = urwid.Pile([self.listbox, ('pack', self.divider), self.preview])
+            self.middle = urwid.Pile([])
+        self.update_preview_layout()
 
         super().__init__(self.middle, self.header_widget, self.footer_widget)
 
     def message(self, message, alert=False):
         self.messagebox.set_text(('alert' if alert else 'normal', message))
+
+    def update_preview_layout(self):
+        if self._preview_shown:
+            if type(self.middle) is urwid.container.Columns:
+                self.middle.contents[:] = [(self.listbox, ('weight', 1, False)),
+                                           (self.preview, ('weight', 1, False))]
+            if type(self.middle) is urwid.container.Pile:
+                self.middle.contents[:] = [(self.listbox, ('weight', 1)),
+                                           (self.divider, ('pack', 1)),
+                                           (self.preview, ('weight', 1))]
+        else:
+            self.middle.contents[:] = [(self.listbox, ('weight', 1, False))]
+        self.middle.focus_position = 0
 
     def keypress(self, size, key):
         debug("ui keypress: {} {}".format(key, size))
@@ -196,6 +212,9 @@ class UI(urwid.Frame):
             self.contents['footer'] = (self.footer_widget, None)
             self.set_focus('body')
             self.searchbox.set_edit_text('')
+        elif key in ['z']:
+            self._preview_shown = not self._preview_shown
+            self.update_preview_layout()
         elif key in ['enter']:
             # dummy search
             pass
