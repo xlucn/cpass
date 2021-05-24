@@ -277,6 +277,7 @@ class Pass:
 
     @staticmethod
     def show(node):
+        debug("showing node: {}".format(node))
         result = run(['pass', 'show', node], stdout=PIPE, stderr=PIPE, text=True)
         return result.stderr if result.returncode else result.stdout
 
