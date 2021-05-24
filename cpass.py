@@ -288,6 +288,14 @@ def unhandled_input(key):
 
 
 class MyConfigParser(configparser.RawConfigParser):
+    def __init__(self):
+        DEFAULT_CONFIG_DIR = os.path.join(os.getenv("HOME"), ".config")
+        CONFIG_DIR = os.getenv("XDG_CONFIG_DIR", DEFAULT_CONFIG_DIR)
+        CONFIG = os.path.join(CONFIG_DIR, "cpass", "cpass.cfg")
+        super().__init__()
+        if os.path.exists(CONFIG):
+            self.read(CONFIG)
+
     def get(self, section, option, fallback=None):
         try:
             return super().get(section, option).strip("\"\'")
@@ -297,8 +305,6 @@ class MyConfigParser(configparser.RawConfigParser):
 
 if __name__ == '__main__':
     config = MyConfigParser()
-    if os.path.exists("cpass.cfg"):
-        config.read("cpass.cfg")
     arg_preview = config.get('ui', 'preview', 'side')
     arg_icon_dir = config.get('icon', 'dir', '/')
     arg_icon_file = config.get('icon', 'file', ' ')
