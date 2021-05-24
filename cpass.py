@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
+import re
 import urwid
+import configparser
 from subprocess import run, PIPE
 
 
@@ -11,17 +13,20 @@ def debug(message):
 
 
 class PassNode(urwid.AttrMap):
-    def __init__(self, text, isdir=False, isempty=False):
+    def __init__(self, text, isdir=False, isempty=False, count=None):
         self._selectable = True
         if isempty:
             self.node = None
             super().__init__(urwid.Text(text, wrap='clip'), 'bright', 'bright')
         else:
             self.node = text
-            text = ('/' if isdir else ' ') + text
             normal = 'dir' if isdir else ''
             focused = 'focusdir' if isdir else 'focus'
-            super().__init__(urwid.Text(text, wrap='clip'), normal, focused)
+            super().__init__(urwid.Columns([
+                ('pack', urwid.Text(arg_icon_dir if isdir else arg_icon_file)),
+                urwid.Text(text, wrap='clip'),
+                ('pack', urwid.Text(str(count) if isdir else '')),
+            ]), normal, focused)
 
     def keypress(self, size, key):
         """ let the widget pass through the keys to parent widget """
@@ -223,8 +228,8 @@ class UI(urwid.Frame):
         self._last_preview = node
 
         if text in self._all_pass[self.listbox.root].dirs:
-            preview = "\n".join(['/' + d for d in self._all_pass[node].dirs]) + \
-                      "\n".join([' ' + f for f in self._all_pass[node].files])
+            preview = "\n".join([arg_icon_dir + d for d in self._all_pass[node].dirs]) + \
+                      "\n".join([arg_icon_file + f for f in self._all_pass[node].files])
         else:
             preview = Pass.show(node)
         self.preview.original_widget.set_text(preview)
@@ -259,24 +264,44 @@ def unhandled_input(key):
         raise urwid.ExitMainLoop
 
 
+class MyConfigParser(configparser.RawConfigParser):
+    def get(self, section, option, fallback=None):
+        try:
+            return super().get(section, option).strip("\"\'")
+        except (configparser.NoOptionError, configparser.NoSectionError):
+            return fallback
+
+
 if __name__ == '__main__':
-    arg_preview = 'side'
+    config = MyConfigParser()
+    config.read("cpass.cfg")
+    arg_preview = config.get('ui', 'preview', 'side')
+    arg_icon_dir = config.get('icon', 'dir', '/')
+    arg_icon_file = config.get('icon', 'file', ' ')
 
     # UI
     passui = UI(allpass=Pass.extract_all())
     # manually update when first opening the program
     passui.update_view()
 
-    # main loop
-    loop = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=[
+    palette = [
         # name          fg              bg              style
-        ('border',      'light cyan',   'default'),
-        ('dir',         'light green',  'default'),
+        ('normal',      'default',      'default'),
+        ('border',      'light green',  'default'),
+        ('dir',         'light blue',   'default'),
         ('alert',       'light red',    'default'),
         ('bright',      'white',        'default'),
         ('focus',       'black',        'white'),
-        ('focusdir',    'black',        'light green',  'bold'),
-    ])
+        ('focusdir',    'black',        'light blue',   'bold'),
+    ]
+    # update from configuration file
+    for attr in palette:
+        colors = config.get('color', attr[0])
+        if colors:
+            palette[palette.index(attr)] = (attr[0], *re.split(',\\s*', colors))
+
+    # main loop
+    loop = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=palette)
     # set no timeout after escape key
     loop.screen.set_input_timeouts(complete_wait=0)
     loop.run()
