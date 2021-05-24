@@ -37,20 +37,6 @@ class PassNode(urwid.AttrMap):
         return key
 
 
-class SearchBox(urwid.Edit):
-    def keypress(self, size, key):
-        debug("search box keypress: " + key)
-        if key in ['esc']:
-            self.set_edit_text('')
-            passui.contents['footer'] = (passui.footer_widget, None)
-            passui.set_focus('body')
-        elif key in ['enter']:
-            # dummy search
-            pass
-        else:
-            return super().keypress(size, key)
-
-
 class PassList(urwid.ListBox):
     def __init__(self, body, root=None, allpass=None, ui=None):
         self.root = root if root else ''
@@ -127,11 +113,6 @@ class PassList(urwid.ListBox):
         elif key in ['A', 'I']:
             # dummy generate
             self.body.insert(self.focus_position, PassNode('foonew'))
-        elif key in ['/']:
-            passui.contents['footer'] = (passui.searchbox, None)
-            passui.set_focus('footer')
-        elif key in ['esc']:
-            passui.messagebox.set_text('')
         else:
             return super().keypress(size, key)
 
@@ -190,7 +171,7 @@ class UI(urwid.Frame):
         self.footer_widget = urwid.Columns([self.messagebox, ('pack', self.indicator)])
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
-        self.searchbox = SearchBox("/")
+        self.searchbox = urwid.Edit("/")
 
         self.walker = urwid.SimpleListWalker(self._all_pass[''].nodelist())
         self.listbox = PassList(self.walker, allpass=allpass, ui=self)
@@ -202,10 +183,24 @@ class UI(urwid.Frame):
         super().__init__(self.middle, self.header_widget, self.footer_widget)
 
     def message(self, message, alert=False):
-        if alert:
-            self.messagebox.set_text(('alert', message))
+        self.messagebox.set_text(('alert' if alert else 'normal', message))
+
+    def keypress(self, size, key):
+        debug("ui keypress: {} {}".format(key, size))
+        if key in ['/']:
+            self.contents['footer'] = (self.searchbox, None)
+            self.set_focus('footer')
+            return None
+        elif key in ['esc']:
+            self.messagebox.set_text('')
+            self.contents['footer'] = (self.footer_widget, None)
+            self.set_focus('body')
+            self.searchbox.set_edit_text('')
+        elif key in ['enter']:
+            # dummy search
+            pass
         else:
-            self.messagebox.set_text(message)
+            return super().keypress(size, key)
 
     def update_view(self):
         self.header_widget.set_text([
