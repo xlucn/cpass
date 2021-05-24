@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+# Author: Lu Xu <oliver_lew at outlook dot com>
+# License: MIT License Copyright (c) 2021 Lu Xu
 import os
 import re
 import urwid
 import configparser
 from subprocess import run, PIPE
+
+version = "0.1.0"
 
 
 def debug(message):
