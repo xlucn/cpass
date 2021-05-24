@@ -200,6 +200,7 @@ class UI(urwid.Frame):
         else:
             self.middle.contents[:] = [(self.listbox, ('weight', 1, False))]
         self.middle.focus_position = 0
+        self.update_view()
 
     def keypress(self, size, key):
         debug("ui keypress: {} {}".format(key, size))
