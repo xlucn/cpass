@@ -297,7 +297,8 @@ class MyConfigParser(configparser.RawConfigParser):
 
 if __name__ == '__main__':
     config = MyConfigParser()
-    config.read("cpass.cfg")
+    if os.path.exists("cpass.cfg"):
+        config.read("cpass.cfg")
     arg_preview = config.get('ui', 'preview', 'side')
     arg_icon_dir = config.get('icon', 'dir', '/')
     arg_icon_file = config.get('icon', 'file', ' ')
