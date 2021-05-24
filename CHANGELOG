@@ -1,0 +1,19 @@
+0.2.0 - 2021-05-24
+
+Added:
+
+- Configuration file support.
+- Able to toggle preview.
+
+0.1.0 - 2021-05-23
+
+Initial release.
+
+Added:
+
+- Able to browse the password store.
+  - Navigation with vim-like key mappings and mouse support.
+  - Remembers the cursor position in every folder.
+- Preview passwords.
+- show current directory and file/subfolder counts in top or bottom bar.
+- Some operations are dummy, they don't work.
