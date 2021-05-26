@@ -56,12 +56,12 @@ class PassList(urwid.ListBox):
                 if row == self.focus_position:
                     self.dir_navigate('down')
                 else:
-                    self.list_navigate(size, to=row)
+                    self.list_navigate(size, new_focus=row)
             else:
                 if row == focus_offset:
                     self.dir_navigate('down')
                 else:
-                    self.list_navigate(size, to=self.focus_position - focus_offset + row)
+                    self.list_navigate(size, new_focus=self.focus_position - focus_offset + row)
         elif button in [3]:
             self.dir_navigate('up')
         elif button in [4]:
@@ -120,23 +120,22 @@ class PassList(urwid.ListBox):
         debug("body length: {}".format(len(self.body)))
         # record current position
         self._all_pass[self.root].pos = self.focus_position
-        if direction in 'down':
-            if self.focus.node in self._all_pass[self.root].dirs:
-                self.root = os.path.join(self.root, self.focus.node)
+        if direction in 'down' and self.focus.node in self._all_pass[self.root].dirs:
+            self.root = os.path.join(self.root, self.focus.node)
         elif direction in 'up':
             self.root = os.path.dirname(self.root)
         # this way the list itself is not replaced
         self.body[:] = self._all_pass[self.root].nodelist()
+        # restore cursor position
         self.focus_position = self._all_pass[self.root].pos
         self._ui.update_view()
 
-    def list_navigate(self, size, shift=0, to=None):
+    def list_navigate(self, size, shift=0, new_focus=None):
         offset = self.get_focus_offset_inset(size)[0]
-        if to is None:
+        if new_focus is None:
             new_focus = self.focus_position + shift
         else:
-            new_focus = to
-            shift = to - self.focus_position
+            shift = new_focus - self.focus_position
         new_offset = offset + shift
         # border check
         new_focus = min(max(new_focus, 0), len(self.body) - 1)
@@ -187,6 +186,8 @@ class UI(urwid.Frame):
         self.update_preview_layout()
 
         super().__init__(self.middle, self.header_widget, self.footer_widget)
+        # manually update when first opening the program
+        self.update_view()
 
     def message(self, message, alert=False):
         self.messagebox.set_text(('alert' if alert else 'normal', message))
@@ -226,37 +227,38 @@ class UI(urwid.Frame):
             return super().keypress(size, key)
 
     def update_view(self):
+        # update header
         self.header_widget.set_text([
             ('border', '{}: '.format(self._app_string)),
             ('dir', '{}/'.format(Pass.PASS_DIR)),
             ('bright', self.listbox.root),
         ])
-
+        # empty dir
         if self.listbox.focus.node is None:
             self.indicator.set_text("0/0")
             self.preview.original_widget.set_text('')
             return
-
+        # update footer
         self.indicator.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
             len(self.listbox.body)
         ))
 
-        text = self.listbox.focus.node
-        node = os.path.join(self.listbox.root, text)
+        node = self.listbox.focus.node
+        node_full = os.path.join(self.listbox.root, node)
 
         if not self._preview_shown:
             return
 
-        if node == self._last_preview:
+        if node_full == self._last_preview:
             return
-        self._last_preview = node
+        self._last_preview = node_full
 
-        if text in self._all_pass[self.listbox.root].dirs:
-            preview = "\n".join([arg_icon_dir + d for d in self._all_pass[node].dirs]) + \
-                      "\n".join([arg_icon_file + f for f in self._all_pass[node].files])
+        if node in self._all_pass[self.listbox.root].dirs:
+            preview = "\n".join([arg_icon_dir + d for d in self._all_pass[node_full].dirs]) + \
+                      "\n".join([arg_icon_file + f for f in self._all_pass[node_full].files])
         else:
-            preview = Pass.show(node)
+            preview = Pass.show(node_full)
         self.preview.original_widget.set_text(preview)
 
 
@@ -314,8 +316,6 @@ if __name__ == '__main__':
 
     # UI
     passui = UI(allpass=Pass.extract_all())
-    # manually update when first opening the program
-    passui.update_view()
 
     palette = [
         # name          fg              bg              style
