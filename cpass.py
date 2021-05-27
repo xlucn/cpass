@@ -113,6 +113,9 @@ class PassList(urwid.ListBox):
         elif key in ['A', 'I']:
             # dummy generate
             self.body.insert(self.focus_position, PassNode('foonew'))
+        elif key in ['e']:
+            if self.focus.node in self._all_pass[self.root].files:
+                self._ui.message(Pass.edit(os.path.join(self.root, self.focus.node)))
         else:
             return super().keypress(size, key)
 
@@ -284,7 +287,14 @@ class Pass:
     def show(node):
         debug("showing node: {}".format(node))
         result = run(['pass', 'show', node], stdout=PIPE, stderr=PIPE, text=True)
+        main.screen.clear()
         return result.stderr if result.returncode else result.stdout
+
+    @staticmethod
+    def edit(node):
+        result = run(['pass', 'edit', node], stderr=PIPE, text=True)
+        main.screen.clear()
+        return result.stderr
 
 
 def unhandled_input(key):
@@ -334,7 +344,7 @@ if __name__ == '__main__':
             palette[palette.index(attr)] = (attr[0], *re.split(',\\s*', colors))
 
     # main loop
-    loop = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=palette)
+    main = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=palette)
     # set no timeout after escape key
-    loop.screen.set_input_timeouts(complete_wait=0)
-    loop.run()
+    main.screen.set_input_timeouts(complete_wait=0)
+    main.run()
