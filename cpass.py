@@ -164,12 +164,15 @@ class UI(urwid.Frame):
         self._app_string = 'cPass'
         self._all_pass = allpass
         self._preview_shown = True
-        self.header_widget = urwid.Text('')
+        self.path_indicator = urwid.Text('', wrap='clip')
+        self._help_string = ' e:edit z:toggle'
+        self.help_line = urwid.Text(self._help_string)
+        self.header_widget = urwid.Columns([self.path_indicator, ('pack', self.help_line)])
         self.messagebox = urwid.Text('')
-        self.indicator = urwid.Text('', align='right')
+        self.count_indicator = urwid.Text('', align='right')
         self.footer_widget = urwid.Columns([
             self.messagebox,
-            ('pack', urwid.AttrMap(self.indicator, 'border'))
+            ('pack', urwid.AttrMap(self.count_indicator, 'border'))
         ])
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
@@ -227,18 +230,17 @@ class UI(urwid.Frame):
 
     def update_view(self):
         # update header
-        self.header_widget.set_text([
+        self.path_indicator.set_text([
             ('border', '{}: '.format(self._app_string)),
-            ('dir', '{}/'.format(Pass.PASS_DIR)),
-            ('bright', self.listbox.root),
+            ('bright', '/{}'.format(self.listbox.root)),
         ])
         # empty dir
         if self.listbox.focus.node is None:
-            self.indicator.set_text("0/0")
+            self.count_indicator.set_text("0/0")
             self.preview.original_widget.set_text('')
             return
         # update footer
-        self.indicator.set_text("{}/{}".format(
+        self.count_indicator.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
             len(self.listbox.body)
         ))
