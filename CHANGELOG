@@ -1,3 +1,10 @@
+0.2.2 - 2021-05-28
+
+Added:
+
+- Edit password by `pass edit`
+
+
 0.2.1 - 2021-05-24
 
 Fixed:
