@@ -19,18 +19,14 @@ def debug(message):
 class PassNode(urwid.AttrMap):
     def __init__(self, text, isdir=False, isempty=False, count=None):
         self._selectable = True
-        if isempty:
-            self.node = None
-            super().__init__(urwid.Text(text, wrap='clip'), 'bright', 'bright')
-        else:
-            self.node = text
-            normal = 'dir' if isdir else ''
-            focused = 'focusdir' if isdir else 'focus'
-            super().__init__(urwid.Columns([
-                ('pack', urwid.Text(arg_icon_dir if isdir else arg_icon_file)),
-                urwid.Text(text, wrap='clip'),
-                ('pack', urwid.Text(str(count) if isdir else '')),
-            ]), normal, focused)
+        self.node = None if isempty else text
+        normal = 'bright' if isempty else 'dir' if isdir else ''
+        focused = 'bright' if isempty else 'focusdir' if isdir else 'focus'
+        super().__init__(urwid.Text(text, wrap='clip') if isempty else urwid.Columns([
+            ('pack', urwid.Text(arg_icon_dir if isdir else arg_icon_file)),
+            urwid.Text(text, wrap='clip'),
+            ('pack', urwid.Text(str(count) if isdir else '')),
+        ]), normal, focused)
 
     def keypress(self, size, key):
         """ let the widget pass through the keys to parent widget """
