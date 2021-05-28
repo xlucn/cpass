@@ -164,6 +164,7 @@ class UI(urwid.Frame):
         self._app_string = 'cPass'
         self._all_pass = allpass
         self._preview_shown = True
+        self._edit_type = None
         self.path_indicator = urwid.Text('', wrap='clip')
         self._help_string = ' e:edit z:toggle'
         self.help_line = urwid.Text(self._help_string)
@@ -176,7 +177,7 @@ class UI(urwid.Frame):
         ])
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
-        self.searchbox = urwid.Edit("/")
+        self.editbox = urwid.Edit()
 
         self.walker = urwid.SimpleListWalker(self._all_pass[''].nodelist())
         self.listbox = PassList(self.walker, allpass=allpass, ui=self)
@@ -210,23 +211,36 @@ class UI(urwid.Frame):
 
     def keypress(self, size, key):
         debug("ui keypress: {} {}".format(key, size))
-        if key in ['/']:
-            self.contents['footer'] = (self.searchbox, None)
-            self.set_focus('footer')
-            return None
-        elif key in ['esc']:
+        if key in ['esc']:
             self.messagebox.set_text('')
-            self.contents['footer'] = (self.footer_widget, None)
-            self.set_focus('body')
-            self.searchbox.set_edit_text('')
+            self.unfocus_edit()
+        elif key in ['enter']:
+            if self._edit_type == "search":
+                # dummy search
+                self.unfocus_edit()
+        elif self._edit_type is not None:
+            # pass through to edit widget
+            # NOTE: is this the right way to do it?
+            super().keypress(size, key)
+        elif key in ['/']:
+            self._edit_type = "search"
+            self.editbox.set_caption('/')
+            self.focus_edit()
         elif key in ['z']:
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
-        elif key in ['enter']:
-            # dummy search
-            pass
         else:
             return super().keypress(size, key)
+
+    def unfocus_edit(self):
+        self.contents['footer'] = (self.footer_widget, None)
+        self.set_focus('body')
+        self._edit_type = None
+
+    def focus_edit(self):
+        self.contents['footer'] = (self.editbox, None)
+        self.set_focus('footer')
+        self.editbox.set_edit_text('')
 
     def update_view(self):
         # update header
