@@ -241,6 +241,7 @@ class UI(urwid.Frame):
     def unfocus_edit(self):
         self.contents['footer'] = (self.footer_widget, None)
         self.set_focus('body')
+        self.editbox.set_mask(None)
         self._edit_type = None
 
     def focus_edit(self):
