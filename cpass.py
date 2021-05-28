@@ -166,7 +166,7 @@ class UI(urwid.Frame):
         self._preview_shown = True
         self._edit_type = None
         self.path_indicator = urwid.Text('', wrap='clip')
-        self._help_string = ' e:edit z:toggle'
+        self._help_string = ' a/i:add e:edit z:toggle'
         self.help_line = urwid.Text(self._help_string)
         self.header_widget = urwid.Columns([self.path_indicator, ('pack', self.help_line)])
         self.messagebox = urwid.Text('')
