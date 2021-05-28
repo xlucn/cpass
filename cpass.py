@@ -34,9 +34,8 @@ class PassNode(urwid.AttrMap):
 
 
 class PassList(urwid.ListBox):
-    def __init__(self, body, root=None, allpass=None, ui=None):
+    def __init__(self, body, root=None, ui=None):
         self.root = root if root else ''
-        self._all_pass = allpass
         self._ui = ui
         super().__init__(body)
 
@@ -110,7 +109,7 @@ class PassList(urwid.ListBox):
             # dummy generate
             self.body.insert(self.focus_position, PassNode('foonew'))
         elif key in ['e']:
-            if self.focus.node in self._all_pass[self.root].files:
+            if self.focus.node in Pass.all_pass[self.root].files:
                 self._ui.message(Pass.edit(os.path.join(self.root, self.focus.node)))
         else:
             return super().keypress(size, key)
@@ -118,15 +117,15 @@ class PassList(urwid.ListBox):
     def dir_navigate(self, direction):
         debug("body length: {}".format(len(self.body)))
         # record current position
-        self._all_pass[self.root].pos = self.focus_position
-        if direction in 'down' and self.focus.node in self._all_pass[self.root].dirs:
+        Pass.all_pass[self.root].pos = self.focus_position
+        if direction in 'down' and self.focus.node in Pass.all_pass[self.root].dirs:
             self.root = os.path.join(self.root, self.focus.node)
         elif direction in 'up':
             self.root = os.path.dirname(self.root)
         # this way the list itself is not replaced
-        self.body[:] = self._all_pass[self.root].nodelist()
+        self.body[:] = Pass.all_pass[self.root].nodelist()
         # restore cursor position
-        self.focus_position = self._all_pass[self.root].pos
+        self.focus_position = Pass.all_pass[self.root].pos
         self._ui.update_view()
 
     def list_navigate(self, size, shift=0, new_focus=None):
@@ -159,10 +158,9 @@ class Directory:
 
 
 class UI(urwid.Frame):
-    def __init__(self, allpass=None):
+    def __init__(self):
         self._last_preview = None
         self._app_string = 'cPass'
-        self._all_pass = allpass
         self._preview_shown = True
         self._edit_type = None
         self.path_indicator = urwid.Text('', wrap='clip')
@@ -179,8 +177,8 @@ class UI(urwid.Frame):
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.editbox = urwid.Edit()
 
-        self.walker = urwid.SimpleListWalker(self._all_pass[''].nodelist())
-        self.listbox = PassList(self.walker, allpass=allpass, ui=self)
+        self.walker = urwid.SimpleListWalker(Pass.all_pass[''].nodelist())
+        self.listbox = PassList(self.walker, ui=self)
 
         if arg_preview in ['side', 'horizontal']:
             self.middle = urwid.Columns([], dividechars=1)
@@ -299,9 +297,10 @@ class UI(urwid.Frame):
             return
         self._last_preview = node_full
 
-        if node in self._all_pass[self.listbox.root].dirs:
-            preview = "\n".join([arg_icon_dir + d for d in self._all_pass[node_full].dirs]) + \
-                      "\n".join([arg_icon_file + f for f in self._all_pass[node_full].files])
+        if node in Pass.all_pass[self.listbox.root].dirs:
+            children = Pass.all_pass[node_full]
+            preview = "\n".join([arg_icon_dir + d for d in children.dirs]) + \
+                      "\n".join([arg_icon_file + f for f in children.files])
         else:
             preview = Pass.show(node_full)
         self.preview.original_widget.set_text(preview)
@@ -310,11 +309,11 @@ class UI(urwid.Frame):
 class Pass:
     FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
     PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
+    all_pass = {}
 
     @classmethod
     def extract_all(cls):
         """ pass files traversal """
-        dir_contents = {}
         for root, dirs, files in os.walk(cls.PASS_DIR, topdown=True):
             if not root.startswith(os.path.join(cls.PASS_DIR, '.git')):
                 root = os.path.normpath(os.path.relpath(root, cls.PASS_DIR))
@@ -322,8 +321,7 @@ class Pass:
                 files = [file.rstrip('.gpg') for file in files if file.endswith('.gpg')]
                 if root == '.':
                     root = ''
-                dir_contents[root] = Directory(root, dirs, files)
-        return dir_contents
+                cls.all_pass[root] = Directory(root, dirs, files)
 
     @staticmethod
     def show(node):
@@ -375,7 +373,7 @@ if __name__ == '__main__':
     arg_icon_file = config.get('icon', 'file', ' ')
 
     # UI
-    passui = UI(allpass=Pass.extract_all())
+    passui = UI()
 
     palette = [
         # name          fg              bg              style
