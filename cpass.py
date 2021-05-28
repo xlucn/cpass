@@ -218,6 +218,8 @@ class UI(urwid.Frame):
             if self._edit_type == "search":
                 # dummy search
                 self.unfocus_edit()
+            elif self._edit_type.startswith("insert"):
+                self.insert()
         elif self._edit_type is not None:
             # pass through to edit widget
             # NOTE: is this the right way to do it?
@@ -225,6 +227,10 @@ class UI(urwid.Frame):
         elif key in ['/']:
             self._edit_type = "search"
             self.editbox.set_caption('/')
+            self.focus_edit()
+        elif key in ['a', 'i']:
+            self._edit_type = "insert"
+            self.editbox.set_caption('Enter password filename: ')
             self.focus_edit()
         elif key in ['z']:
             self._preview_shown = not self._preview_shown
@@ -241,6 +247,29 @@ class UI(urwid.Frame):
         self.contents['footer'] = (self.editbox, None)
         self.set_focus('footer')
         self.editbox.set_edit_text('')
+
+    def insert(self):
+        if self._edit_type == "insert":
+            self._insert_path = os.path.join(self.listbox.root, self.editbox.edit_text)
+            self._edit_type = "insert_password"
+            self.editbox.set_caption('Enter password: ')
+            self.editbox.set_mask("*")
+            self.editbox.set_edit_text('')
+        elif self._edit_type == "insert_password":
+            self._insert_pass = self.editbox.edit_text
+            self._edit_type = "insert_password_confirm"
+            self.editbox.set_caption('Enter password again: ')
+            self.editbox.set_mask("*")
+            self.editbox.set_edit_text('')
+        elif self._edit_type == "insert_password_confirm":
+            self.insert_pass_again = self.editbox.edit_text
+            self.editbox.set_mask(None)
+            self.editbox.set_edit_text('')
+            self.unfocus_edit()
+            if self._insert_pass == self.insert_pass_again:
+                Pass.insert(self._insert_path, self._insert_pass)
+            else:
+                self.message("Password is not the same", alert=True)
 
     def update_view(self):
         # update header
@@ -306,6 +335,14 @@ class Pass:
     def edit(node):
         result = run(['pass', 'edit', node], stderr=PIPE, text=True)
         main.screen.clear()
+        return result.stderr
+
+    @staticmethod
+    def insert(node, password):
+        pw = password + '\n' + password + '\n'
+        result = run(['pass', 'insert', node], input=pw, stderr=PIPE, text=True)
+        main.screen.clear()
+        debug(result.stderr)
         return result.stderr
 
 
