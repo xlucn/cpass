@@ -17,16 +17,21 @@ def debug(message):
 
 
 class PassNode(urwid.AttrMap):
-    def __init__(self, text, isdir=False, isempty=False, count=None):
+    def __init__(self, node, root, isdir=False):
+        """ node=None to represent empty node """
         self._selectable = True
-        self.node = None if isempty else text
-        normal = 'bright' if isempty else 'dir' if isdir else ''
-        focused = 'bright' if isempty else 'focusdir' if isdir else 'focus'
-        super().__init__(urwid.Text(text, wrap='clip') if isempty else urwid.Columns([
-            ('pack', urwid.Text(arg_icon_dir if isdir else arg_icon_file)),
-            urwid.Text(text, wrap='clip'),
-            ('pack', urwid.Text(str(count) if isdir else '')),
-        ]), normal, focused)
+        self.node = node
+        self.text = node if node else "-- EMPTY --"
+        self.path = os.path.join(root, node) if node else None
+        self.icon = arg_icon_dir if isdir else arg_icon_file if node else ''
+        self.count = len(Pass.all_pass[self.path].all) if isdir else None
+        super().__init__(urwid.Columns([
+            ('pack', urwid.Text(self.icon)),
+            urwid.Text(self.text, wrap='clip'),
+            ('pack', urwid.Text(str(self.count) if isdir else ''))]),
+            'dir' if isdir else '' if node else 'bright',
+            'focusdir' if isdir else 'focus' if node else 'bright',
+        )
 
     def keypress(self, size, key):
         """ let the widget pass through the keys to parent widget """
@@ -104,10 +109,10 @@ class PassList(urwid.ListBox):
                 self.body.pop(self.focus_position)
         elif key in ['a', 'i']:
             # dummy add
-            self.body.insert(self.focus_position, PassNode('foonew'))
+            self.body.insert(self.focus_position, PassNode('foonew', self.root))
         elif key in ['A', 'I']:
             # dummy generate
-            self.body.insert(self.focus_position, PassNode('foonew'))
+            self.body.insert(self.focus_position, PassNode('foonew', self.root))
         elif key in ['e']:
             if self.focus.node in Pass.all_pass[self.root].files:
                 self._ui.message(Pass.edit(os.path.join(self.root, self.focus.node)))
@@ -147,14 +152,15 @@ class Directory:
         self.root = root
         self.dirs = sorted(dirs)
         self.files = sorted(files)
+        self.all = self.dirs + self.files
         self.pos = 0  # cursor position
 
     def nodelist(self):
         if len(self.dirs) > 0 or len(self.files) > 0:
-            return [PassNode(d, isdir=True) for d in self.dirs] + \
-                   [PassNode(f) for f in self.files]
+            return [PassNode(d, self.root, True) for d in self.dirs] + \
+                   [PassNode(f, self.root) for f in self.files]
         else:
-            return [PassNode("-- EMPTY --", isempty=True)]
+            return [PassNode(None, None)]
 
 
 class UI(urwid.Frame):
