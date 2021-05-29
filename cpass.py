@@ -318,7 +318,7 @@ class Pass:
             if not root.startswith(os.path.join(cls.PASS_DIR, '.git')):
                 root = os.path.normpath(os.path.relpath(root, cls.PASS_DIR))
                 dirs = [os.path.join('', d) for d in dirs if d != '.git']
-                files = [file.rstrip('.gpg') for file in files if file.endswith('.gpg')]
+                files = [file[:-4] for file in files if file.endswith('.gpg')]
                 if root == '.':
                     root = ''
                 cls.all_pass[root] = Directory(root, dirs, files)
