@@ -1,15 +1,30 @@
+0.3.0 2021-05-30
+
+Added:
+
+- Add password by `pass insert`
+- Show count of folder contents.
+- Show main keybindings on the header.
+
+Fixed:
+
+- File name over-striped due to misuse of `rstrip` function.
+- Keybindings take over text editing.
+
+
 0.2.2 - 2021-05-28
 
 Added:
 
-- Edit password by `pass edit`
+- Edit password by `pass edit`.
 
 
 0.2.1 - 2021-05-24
 
 Fixed:
 
-- Search for configuration file in user configuration folder
+- Search for configuration file in user configuration folder instead of a relative path.
+
 
 0.2.0 - 2021-05-24
 
@@ -17,6 +32,7 @@ Added:
 
 - Configuration file support.
 - Able to toggle preview.
+
 
 0.1.0 - 2021-05-23
 
@@ -28,5 +44,5 @@ Added:
   - Navigation with vim-like key mappings and mouse support.
   - Remembers the cursor position in every folder.
 - Preview passwords.
-- show current directory and file/subfolder counts in top or bottom bar.
+- Show current directory and file/subfolder counts in top or bottom bar.
 - Some operations are dummy, they don't work.
