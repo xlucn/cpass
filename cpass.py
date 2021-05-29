@@ -44,7 +44,7 @@ class PassList(urwid.ListBox):
         debug("passlist mouse event: {} {} {} {} {} {} {} {}".format(
             size, event, button, col, row, focus, self.focus_position, focus_offset
         ))
-        if button in [1]:
+        if button == 1:
             if size[1] > len(self.body):
                 # NOTE: offset is wrong(?) when size is larger than length
                 # so the processing is different
@@ -57,11 +57,11 @@ class PassList(urwid.ListBox):
                     self.dir_navigate('down')
                 else:
                     self.list_navigate(size, new_focus=self.focus_position - focus_offset + row)
-        elif button in [3]:
+        elif button == 3:
             self.dir_navigate('up')
-        elif button in [4]:
+        elif button == 4:
             self.list_navigate(size, -1)
-        elif button in [5]:
+        elif button == 5:
             self.list_navigate(size, 1)
         else:
             return super().mouse_event(size, event, button, col, row, focus)
