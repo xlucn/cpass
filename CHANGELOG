@@ -1,8 +1,18 @@
+0.3.1  2021-05-30
+
+Hot fix release.
+
+Fixed:
+
+- Wrong folder preview due to duplicated name as files.
+- forgot to add a line of code in a previous commit.
+
+
 0.3.0 2021-05-30
 
 Added:
 
-- Add password by `pass insert`
+- Add password by `pass insert`.
 - Show count of folder contents.
 - Show main keybindings on the header.
 
@@ -20,6 +30,8 @@ Added:
 
 
 0.2.1 - 2021-05-24
+
+Hot fix release.
 
 Fixed:
 
