@@ -20,12 +20,14 @@ class PassNode(urwid.AttrMap):
     def __init__(self, node, root, isdir=False):
         """ node=None to represent empty node """
         self._selectable = True
+
         self.node = node
         self.isdir = isdir
         self.text = node if node else "-- EMPTY --"
         self.path = os.path.join(root, node) if node else None
         self.icon = arg_icon_dir if isdir else arg_icon_file if node else ''
         self.count = str(len(Pass.all_pass[self.path].all)) if isdir else ''
+
         super().__init__(urwid.Columns([
                 ('pack', urwid.Text(self.icon)),
                 urwid.Text(self.text, wrap='clip'),
@@ -48,9 +50,11 @@ class PassList(urwid.ListBox):
 
     def mouse_event(self, size, event, button, col, row, focus):
         focus_offset = self.get_focus_offset_inset(size)[0]
+
         debug("passlist mouse event: {} {} {} {} {} {} {} {}".format(
             size, event, button, col, row, focus, self.focus_position, focus_offset
         ))
+
         if button == 1:
             if size[1] > len(self.body):
                 # NOTE: offset is wrong(?) when size is larger than length
@@ -75,6 +79,7 @@ class PassList(urwid.ListBox):
 
     def keypress(self, size, key):
         debug("passlist keypress: {} {}".format(key, size))
+
         list_navigations = {
             'j': 1,
             'k': -1,
@@ -94,6 +99,7 @@ class PassList(urwid.ListBox):
             'end': len(self.body),
             'home': -len(self.body),
         }
+
         dir_navigations = {
             'l':     'down',
             'h':     'up',
@@ -101,6 +107,7 @@ class PassList(urwid.ListBox):
             'left':  'up',
             'enter': 'down',
         }
+
         if key in list_navigations:
             self.list_navigate(size, list_navigations[key])
         elif key in dir_navigations:
@@ -123,28 +130,38 @@ class PassList(urwid.ListBox):
 
     def dir_navigate(self, direction):
         debug("body length: {}".format(len(self.body)))
+
         # record current position
         Pass.all_pass[self.root].pos = self.focus_position
+
+        # change root position accordingly
         if direction in 'down' and self.focus.node in Pass.all_pass[self.root].dirs:
             self.root = os.path.join(self.root, self.focus.node)
         elif direction in 'up':
             self.root = os.path.dirname(self.root)
-        # this way the list itself is not replaced
+
+        # update listbox content, this way the list itself is not replaced
         self.body[:] = Pass.all_pass[self.root].nodelist()
-        # restore cursor position
+
+        # restore cursor position of the new root
         self.focus_position = Pass.all_pass[self.root].pos
+
         self._ui.update_view()
 
     def list_navigate(self, size, shift=0, new_focus=None):
         offset = self.get_focus_offset_inset(size)[0]
+
+        # either specify a shift offset, or an absolute position
         if new_focus is None:
             new_focus = self.focus_position + shift
         else:
             shift = new_focus - self.focus_position
         new_offset = offset + shift
+
         # border check
         new_focus = min(max(new_focus, 0), len(self.body) - 1)
         new_offset = min(max(new_offset, 0), size[1] - 1)
+
         self.change_focus(size, new_focus, offset_inset=new_offset)
         self._ui.update_view()
 
@@ -171,10 +188,12 @@ class UI(urwid.Frame):
         self._app_string = 'cPass'
         self._preview_shown = True
         self._edit_type = None
-        self.path_indicator = urwid.Text('', wrap='clip')
         self._help_string = ' a/i:add e:edit z:toggle'
-        self.help_line = urwid.Text(self._help_string)
-        self.header_widget = urwid.Columns([self.path_indicator, ('pack', self.help_line)])
+
+        # widgets
+        self.path_indicator = urwid.Text('', wrap='clip')
+        self.help_text = urwid.Text(self._help_string)
+        self.header_widget = urwid.Columns([self.path_indicator, ('pack', self.help_text)])
         self.messagebox = urwid.Text('')
         self.count_indicator = urwid.Text('', align='right')
         self.footer_widget = urwid.Columns([
@@ -188,6 +207,7 @@ class UI(urwid.Frame):
         self.walker = urwid.SimpleListWalker(Pass.all_pass[''].nodelist())
         self.listbox = PassList(self.walker, ui=self)
 
+        # use Columns for horizonal layout, and Pile for vertical
         if arg_preview in ['side', 'horizontal']:
             self.middle = urwid.Columns([], dividechars=1)
         elif arg_preview in ['bottom', 'vertical']:
@@ -203,10 +223,10 @@ class UI(urwid.Frame):
 
     def update_preview_layout(self):
         if self._preview_shown:
-            if type(self.middle) is urwid.container.Columns:
+            if arg_preview in ['side', 'horizontal']:
                 self.middle.contents[:] = [(self.listbox, ('weight', 1, False)),
                                            (self.preview, ('weight', 1, False))]
-            if type(self.middle) is urwid.container.Pile:
+            if arg_preview in ['bottom', 'vertical']:
                 self.middle.contents[:] = [(self.listbox, ('weight', 1)),
                                            (self.divider, ('pack', 1)),
                                            (self.preview, ('weight', 1))]
@@ -284,29 +304,31 @@ class UI(urwid.Frame):
             ('border', '{}: '.format(self._app_string)),
             ('bright', '/{}'.format(self.listbox.root)),
         ])
+
         # empty dir
         if self.listbox.focus.node is None:
             self.count_indicator.set_text("0/0")
             self.preview.original_widget.set_text('')
             return
+
         # update footer
         self.count_indicator.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
             len(self.listbox.body)
         ))
 
-        node = self.listbox.focus.node
-        node_full = os.path.join(self.listbox.root, node)
-
         if not self._preview_shown:
             return
 
-        if node_full == self._last_preview:
+        node = self.listbox.focus.node
+        path = os.path.join(self.listbox.root, node)
+
+        if path == self._last_preview:
             return
-        self._last_preview = node_full
+        self._last_preview = path
 
         if self.listbox.focus.isdir:
-            children = Pass.all_pass[node_full]
+            children = Pass.all_pass[path]
             preview = "\n".join([arg_icon_dir + d for d in children.dirs]) + \
                       "\n".join([arg_icon_file + f for f in children.files])
         else:
