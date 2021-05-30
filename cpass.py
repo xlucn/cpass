@@ -41,9 +41,9 @@ class PassNode(urwid.AttrMap):
 
 
 class PassList(urwid.ListBox):
-    def __init__(self, body, root=None, ui=None):
-        self.root = root if root else ''
+    def __init__(self, body, root='', ui=None):
         self._ui = ui
+        self.root = root
         super().__init__(body)
 
     def mouse_event(self, size, event, button, col, row, focus):
