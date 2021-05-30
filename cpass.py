@@ -24,11 +24,12 @@ class PassNode(urwid.AttrMap):
         self.text = node if node else "-- EMPTY --"
         self.path = os.path.join(root, node) if node else None
         self.icon = arg_icon_dir if isdir else arg_icon_file if node else ''
-        self.count = len(Pass.all_pass[self.path].all) if isdir else None
+        self.count = str(len(Pass.all_pass[self.path].all)) if isdir else ''
         super().__init__(urwid.Columns([
-            ('pack', urwid.Text(self.icon)),
-            urwid.Text(self.text, wrap='clip'),
-            ('pack', urwid.Text(str(self.count) if isdir else ''))]),
+                ('pack', urwid.Text(self.icon)),
+                urwid.Text(self.text, wrap='clip'),
+                ('pack', urwid.Text(self.count))
+            ]),
             'dir' if isdir else '' if node else 'bright',
             'focusdir' if isdir else 'focus' if node else 'bright',
         )
