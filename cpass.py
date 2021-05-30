@@ -21,6 +21,7 @@ class PassNode(urwid.AttrMap):
         """ node=None to represent empty node """
         self._selectable = True
         self.node = node
+        self.isdir = isdir
         self.text = node if node else "-- EMPTY --"
         self.path = os.path.join(root, node) if node else None
         self.icon = arg_icon_dir if isdir else arg_icon_file if node else ''
@@ -304,7 +305,7 @@ class UI(urwid.Frame):
             return
         self._last_preview = node_full
 
-        if node in Pass.all_pass[self.listbox.root].dirs:
+        if self.listbox.focus.isdir:
             children = Pass.all_pass[node_full]
             preview = "\n".join([arg_icon_dir + d for d in children.dirs]) + \
                       "\n".join([arg_icon_file + f for f in children.files])
