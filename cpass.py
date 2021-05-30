@@ -379,6 +379,7 @@ if __name__ == '__main__':
     arg_icon_dir = config.get('icon', 'dir', '/')
     arg_icon_file = config.get('icon', 'file', ' ')
 
+    Pass.extract_all()
     # UI
     passui = UI()
 
