@@ -333,13 +333,13 @@ class Pass:
 
     @staticmethod
     def show(node):
-        debug("showing node: {}".format(node))
         result = run(['pass', 'show', node], stdout=PIPE, stderr=PIPE, text=True)
         main.screen.clear()
         return result.stderr if result.returncode else result.stdout
 
     @staticmethod
     def edit(node):
+        # can not pipe stdout because this will start vim
         result = run(['pass', 'edit', node], stderr=PIPE, text=True)
         main.screen.clear()
         return result.stderr
@@ -349,7 +349,6 @@ class Pass:
         pw = password + '\n' + password + '\n'
         result = run(['pass', 'insert', node], input=pw, stderr=PIPE, text=True)
         main.screen.clear()
-        debug(result.stderr)
         return result.stderr
 
 
