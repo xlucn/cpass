@@ -26,6 +26,7 @@ class PassNode(urwid.AttrMap):
         self.text = node if node else "-- EMPTY --"
         self.path = os.path.join(root, node) if node else None
         self.icon = arg_icon_dir if isdir else arg_icon_file if node else ''
+        # topdown option in os.walk makes this possible
         self.count = str(len(Pass.all_pass[self.path].all)) if isdir else ''
 
         super().__init__(urwid.Columns([
@@ -141,7 +142,7 @@ class PassList(urwid.ListBox):
             self.root = os.path.dirname(self.root)
 
         # update listbox content, this way the list itself is not replaced
-        self.body[:] = Pass.all_pass[self.root].nodelist()
+        self.body[:] = Pass.all_pass[self.root]
 
         # restore cursor position of the new root
         self.focus_position = Pass.all_pass[self.root].pos
@@ -166,7 +167,7 @@ class PassList(urwid.ListBox):
         self._ui.update_view()
 
 
-class Directory:
+class FolderWalker(urwid.SimpleListWalker):
     def __init__(self, root, dirs, files):
         self.root = root
         self.dirs = sorted(dirs)
@@ -174,12 +175,12 @@ class Directory:
         self.all = self.dirs + self.files
         self.pos = 0  # cursor position
 
-    def nodelist(self):
-        if len(self.dirs) > 0 or len(self.files) > 0:
-            return [PassNode(d, self.root, True) for d in self.dirs] + \
-                   [PassNode(f, self.root) for f in self.files]
-        else:
-            return [PassNode(None, None)]
+        super().__init__(
+            [PassNode(d, self.root, True) for d in self.dirs] + \
+            [PassNode(f, self.root) for f in self.files]
+        )
+        if len(self) == 0:
+            super().__init__([PassNode(None, None)])
 
 
 class UI(urwid.Frame):
@@ -204,7 +205,7 @@ class UI(urwid.Frame):
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.editbox = urwid.Edit()
 
-        self.walker = urwid.SimpleListWalker(Pass.all_pass[''].nodelist())
+        self.walker = urwid.SimpleListWalker(Pass.all_pass[''])
         self.listbox = PassList(self.walker, ui=self)
 
         # use Columns for horizonal layout, and Pile for vertical
@@ -224,14 +225,14 @@ class UI(urwid.Frame):
     def update_preview_layout(self):
         if self._preview_shown:
             if arg_preview in ['side', 'horizontal']:
-                self.middle.contents[:] = [(self.listbox, ('weight', 1, False)),
+                self.middle.contents = [(self.listbox, ('weight', 1, False)),
                                            (self.preview, ('weight', 1, False))]
             if arg_preview in ['bottom', 'vertical']:
-                self.middle.contents[:] = [(self.listbox, ('weight', 1)),
+                self.middle.contents = [(self.listbox, ('weight', 1)),
                                            (self.divider, ('pack', 1)),
                                            (self.preview, ('weight', 1))]
         else:
-            self.middle.contents[:] = [(self.listbox, ('weight', 1, False))]
+            self.middle.contents = [(self.listbox, ('weight', 1, False))]
         self.middle.focus_position = 0
         self.update_view()
 
@@ -343,15 +344,15 @@ class Pass:
 
     @classmethod
     def extract_all(cls):
-        """ pass files traversal """
-        for root, dirs, files in os.walk(cls.PASS_DIR, topdown=True):
+        # pass files traversal, topdown option is essential, see PassNode
+        for root, dirs, files in os.walk(cls.PASS_DIR, topdown=False):
             if not root.startswith(os.path.join(cls.PASS_DIR, '.git')):
                 root = os.path.normpath(os.path.relpath(root, cls.PASS_DIR))
                 dirs = [os.path.join('', d) for d in dirs if d != '.git']
                 files = [file[:-4] for file in files if file.endswith('.gpg')]
                 if root == '.':
                     root = ''
-                cls.all_pass[root] = Directory(root, dirs, files)
+                cls.all_pass[root] = FolderWalker(root, dirs, files)
 
     @staticmethod
     def show(node):
