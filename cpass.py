@@ -123,7 +123,7 @@ class PassList(urwid.ListBox):
                 self.delete(self.focus_position)
         elif key in ['a', 'i', 'o']:
             # dummy add
-            self.insert(self.focus_position, PassNode('foonew', self.root))
+            self.insert(PassNode('foonew', self.root))
         elif key in ['A', 'I']:
             # dummy generate
             self.body.insert(self.focus_position, PassNode('foonew', self.root))
@@ -170,14 +170,15 @@ class PassList(urwid.ListBox):
         self.change_focus(size, new_focus, offset_inset=new_offset)
         self._ui.update_preview()
 
-    def insert(self, pos, passnode):
+    def insert(self, passnode):
         # change stored list
         root_list = Pass.all_pass[self.root]
         if len(root_list) == 1 and root_list[0].node is None:
             root_list.pop()
-        root_list.insert(pos, passnode)
+        root_list.insert(passnode)
         # change listwalker
         self.body[:] = root_list
+        self._ui.update_view()
 
     def delete(self, pos):
         # change stored list
@@ -187,6 +188,7 @@ class PassList(urwid.ListBox):
         if len(root_list) == 0:
             root_list.append(PassNode(None, None))
         self.body[:] = root_list
+        self._ui.update_view()
 
 
 class FolderWalker(list):
@@ -196,6 +198,13 @@ class FolderWalker(list):
         self[:] = [PassNode(f, root, f in dirs) for f in sorted(dirs) + sorted(files)]
         if len(self) == 0:
             self[:] = [PassNode(None, None)]
+
+    def insert(self, node):
+        if node.node in [n.node for n in self]:
+            return
+        super().insert(self.pos, node)
+        self[:] = sorted([n for n in self if n.isdir], key=lambda n: n.node) + \
+            sorted([n for n in self if not n.isdir], key=lambda n: n.node)
 
 
 class UI(urwid.Frame):
@@ -292,6 +301,7 @@ class UI(urwid.Frame):
     # TODO: this code is not good, put all editbox into its own class?
     def insert_getpass(self):
         if self._edit_type == "insert":
+            self._insert_node = self.editbox.edit_text
             self._insert_path = os.path.join(self.listbox.root, self.editbox.edit_text)
             self._edit_type = "insert_password"
             self.editbox.set_caption('Enter password: ')
@@ -304,12 +314,17 @@ class UI(urwid.Frame):
             self.editbox.set_mask("*")
             self.editbox.set_edit_text('')
         elif self._edit_type == "insert_password_confirm":
-            self.insert_pass_again = self.editbox.edit_text
+            self._insert_pass_again = self.editbox.edit_text
             self.editbox.set_mask(None)
             self.editbox.set_edit_text('')
             self.unfocus_edit()
-            if self._insert_pass == self.insert_pass_again:
-                Pass.insert(self._insert_path, self._insert_pass)
+            if self._insert_pass == self._insert_pass_again:
+                res = Pass.insert(self._insert_path, self._insert_pass)
+                if res.returncode == 0:
+                    self.message("Insert: " + self._insert_path)
+                    self.listbox.insert(PassNode(self._insert_node, self.listbox.root))
+                else:
+                    self.message(res.stderr, alert=True)
             else:
                 self.message("Password is not the same", alert=True)
 
@@ -381,9 +396,10 @@ class Pass:
     @staticmethod
     def insert(node, password):
         pw = password + '\n' + password + '\n'
-        result = run(['pass', 'insert', node], input=pw, stderr=PIPE, text=True)
+        result = run(['pass', 'insert', '-f', node], input=pw,
+                     stdout=PIPE, stderr=PIPE, text=True)
         main.screen.clear()
-        return result.stderr
+        return result
 
 
 def unhandled_input(key):
