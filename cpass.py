@@ -10,10 +10,14 @@ from subprocess import run, PIPE
 version = "0.3.1"
 
 
-def debug(message):
-    if os.getenv('DEBUG'):
-        open('log', 'a').write(message.rstrip('\n') + '\n')
-        passui.message(message)
+class Debug:
+    dfile = open('log', 'a')
+    if_debug = os.getenv('DEBUG')
+
+    @classmethod
+    def log(cls, message):
+        if cls.if_debug:
+            cls.dfile.write(message.rstrip('\n') + '\n')
 
 
 class PassNode(urwid.AttrMap):
@@ -52,7 +56,7 @@ class PassList(urwid.ListBox):
     def mouse_event(self, size, event, button, col, row, focus):
         focus_offset = self.get_focus_offset_inset(size)[0]
 
-        debug("passlist mouse event: {} {} {} {} {} {} {} {}".format(
+        Debug.log("passlist mouse event: {} {} {} {} {} {} {} {}".format(
             size, event, button, col, row, focus, self.focus_position, focus_offset
         ))
 
@@ -79,7 +83,7 @@ class PassList(urwid.ListBox):
             return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size, key):
-        debug("passlist keypress: {} {}".format(key, size))
+        Debug.log("passlist keypress: {} {}".format(key, size))
 
         list_navigations = {
             'j': 1,
@@ -130,7 +134,7 @@ class PassList(urwid.ListBox):
             return super().keypress(size, key)
 
     def dir_navigate(self, direction):
-        debug("body length: {}".format(len(self.body)))
+        Debug.log("body length: {}".format(len(self.body)))
 
         # record current position
         Pass.all_pass[self.root].pos = self.focus_position
@@ -247,7 +251,7 @@ class UI(urwid.Frame):
         self.middle.focus_position = 0
 
     def keypress(self, size, key):
-        debug("ui keypress: {} {}".format(key, size))
+        Debug.log("ui keypress: {} {}".format(key, size))
         if key in ['esc']:
             self.messagebox.set_text('')
             self.unfocus_edit()
