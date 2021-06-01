@@ -225,6 +225,7 @@ class UI(urwid.Frame):
         elif arg_preview_layout in ['bottom', 'vertical']:
             self.middle = urwid.Pile([])
         self.update_preview_layout()
+        self.update_view()
 
         super().__init__(self.middle, self.header_widget, self.footer_widget)
 
@@ -240,10 +241,10 @@ class UI(urwid.Frame):
                 self.middle.contents = [(self.listbox, ('weight', 1)),
                                            (self.divider, ('pack', 1)),
                                            (self.preview, ('weight', 1))]
+            self.update_preview()
         else:
             self.middle.contents = [(self.listbox, ('weight', 1, False))]
         self.middle.focus_position = 0
-        self.update_preview()
 
     def keypress(self, size, key):
         debug("ui keypress: {} {}".format(key, size))
@@ -322,10 +323,12 @@ class UI(urwid.Frame):
             len(self.listbox.body)
         ) if self.listbox.focus.node else "0/0")
 
-        if self._preview_shown:
-            self.update_preview()
+        self.update_preview()
 
     def update_preview(self):
+        if not self._preview_shown:
+            return
+
         node = self.listbox.focus.text
         path = os.path.join(self.listbox.root, node)
 
