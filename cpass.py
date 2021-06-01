@@ -116,10 +116,10 @@ class PassList(urwid.ListBox):
         elif key in ['d']:
             # dummy delete
             if len(self.body) > 0:
-                self.body.pop(self.focus_position)
-        elif key in ['a', 'i']:
+                self.delete(self.focus_position)
+        elif key in ['a', 'i', 'o']:
             # dummy add
-            self.body.insert(self.focus_position, PassNode('foonew', self.root))
+            self.insert(self.focus_position, PassNode('foonew', self.root))
         elif key in ['A', 'I']:
             # dummy generate
             self.body.insert(self.focus_position, PassNode('foonew', self.root))
@@ -165,6 +165,24 @@ class PassList(urwid.ListBox):
 
         self.change_focus(size, new_focus, offset_inset=new_offset)
         self._ui.update_preview()
+
+    def insert(self, pos, passnode):
+        # change stored list
+        root_list = Pass.all_pass[self.root]
+        if len(root_list) == 1 and root_list[0].node is None:
+            root_list.pop()
+        root_list.insert(pos, passnode)
+        # change listwalker
+        self.body[:] = root_list
+
+    def delete(self, pos):
+        # change stored list
+        root_list = Pass.all_pass[self.root]
+        # change listwalker
+        root_list.pop(pos)
+        if len(root_list) == 0:
+            root_list.append(PassNode(None, None))
+        self.body[:] = root_list
 
 
 class FolderWalker(list):
