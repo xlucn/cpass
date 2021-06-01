@@ -24,10 +24,10 @@ class PassNode(urwid.AttrMap):
         self.node = node
         self.isdir = isdir
         self.text = node if node else "-- EMPTY --"
-        self.path = os.path.join(root, node) if node else None
+        self.path = os.path.join(root, node) if node else ''
         self.icon = arg_icon_dir if isdir else arg_icon_file if node else ''
         # topdown option in os.walk makes this possible
-        self.count = str(len(Pass.all_pass[self.path].all)) if isdir else ''
+        self.count = str(len(Pass.all_pass[self.path])) if isdir else ''
 
         super().__init__(urwid.Columns([
                 ('pack', urwid.Text(self.icon)),
@@ -124,7 +124,7 @@ class PassList(urwid.ListBox):
             # dummy generate
             self.body.insert(self.focus_position, PassNode('foonew', self.root))
         elif key in ['e']:
-            if self.focus.node in Pass.all_pass[self.root].files:
+            if not self.focus.isdir:
                 self._ui.message(Pass.edit(os.path.join(self.root, self.focus.node)))
         else:
             return super().keypress(size, key)
@@ -136,7 +136,7 @@ class PassList(urwid.ListBox):
         Pass.all_pass[self.root].pos = self.focus_position
 
         # change root position accordingly
-        if direction in 'down' and self.focus.node in Pass.all_pass[self.root].dirs:
+        if direction in 'down' and self.focus.isdir:
             self.root = os.path.join(self.root, self.focus.node)
         elif direction in 'up':
             self.root = os.path.dirname(self.root)
@@ -167,20 +167,13 @@ class PassList(urwid.ListBox):
         self._ui.update_view()
 
 
-class FolderWalker(urwid.SimpleListWalker):
+class FolderWalker(list):
     def __init__(self, root, dirs, files):
-        self.root = root
-        self.dirs = sorted(dirs)
-        self.files = sorted(files)
-        self.all = self.dirs + self.files
         self.pos = 0  # cursor position
 
-        super().__init__(
-            [PassNode(d, self.root, True) for d in self.dirs] + \
-            [PassNode(f, self.root) for f in self.files]
-        )
+        self[:] = [PassNode(f, root, f in dirs) for f in sorted(dirs) + sorted(files)]
         if len(self) == 0:
-            super().__init__([PassNode(None, None)])
+            self[:] = [PassNode(None, None)]
 
 
 class UI(urwid.Frame):
@@ -329,9 +322,7 @@ class UI(urwid.Frame):
         self._last_preview = path
 
         if self.listbox.focus.isdir:
-            children = Pass.all_pass[path]
-            preview = "\n".join([arg_icon_dir + d for d in children.dirs]) + \
-                      "\n".join([arg_icon_file + f for f in children.files])
+            preview = "\n".join([(f.icon + f.text) for f in Pass.all_pass[path]])
         else:
             preview = Pass.show(node_full)
         self.preview.original_widget.set_text(preview)
