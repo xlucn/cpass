@@ -236,11 +236,11 @@ class UI(urwid.Frame):
         if self._preview_shown:
             if arg_preview_layout in ['side', 'horizontal']:
                 self.middle.contents = [(self.listbox, ('weight', 1, False)),
-                                           (self.preview, ('weight', 1, False))]
+                                        (self.preview, ('weight', 1, False))]
             if arg_preview_layout in ['bottom', 'vertical']:
                 self.middle.contents = [(self.listbox, ('weight', 1)),
-                                           (self.divider, ('pack', 1)),
-                                           (self.preview, ('weight', 1))]
+                                        (self.divider, ('pack', 1)),
+                                        (self.preview, ('weight', 1))]
             self.update_preview()
         else:
             self.middle.contents = [(self.listbox, ('weight', 1, False))]
