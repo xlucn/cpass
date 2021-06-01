@@ -237,7 +237,7 @@ class UI(urwid.Frame):
                 # dummy search
                 self.unfocus_edit()
             elif self._edit_type.startswith("insert"):
-                self.insert()
+                self.insert_getpass()
         elif self._edit_type is not None:
             # pass through to edit widget
             # NOTE: is this the right way to do it?
@@ -267,7 +267,8 @@ class UI(urwid.Frame):
         self.set_focus('footer')
         self.editbox.set_edit_text('')
 
-    def insert(self):
+    # TODO: this code is not good, put all editbox into its own class?
+    def insert_getpass(self):
         if self._edit_type == "insert":
             self._insert_path = os.path.join(self.listbox.root, self.editbox.edit_text)
             self._edit_type = "insert_password"
