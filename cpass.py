@@ -269,6 +269,15 @@ class UI(urwid.Frame):
             if self._edit_type == "search":
                 # dummy search
                 self.unfocus_edit()
+            elif self._edit_type == "generate":
+                gen_path = os.path.join(self.listbox.root, self.editbox.edit_text)
+                res = Pass.generate(gen_path)
+                if res.returncode == 0:
+                    self.message("Generate: " + gen_path)
+                    self.listbox.insert(PassNode(self.editbox.edit_text, self.listbox.root))
+                else:
+                    self.message(res.stderr, alert=True)
+                self.unfocus_edit()
             elif self._edit_type.startswith("insert"):
                 self.insert_getpass()
         elif self._edit_type is not None:
@@ -281,6 +290,10 @@ class UI(urwid.Frame):
         elif key in ['a', 'i']:
             self._edit_type = "insert"
             self.editbox.set_caption('Enter password filename: ')
+            self.focus_edit()
+        elif key in ['A', 'I']:
+            self._edit_type = "generate"
+            self.editbox.set_caption('Generate a password file: ')
             self.focus_edit()
         elif key in ['z']:
             self._preview_shown = not self._preview_shown
@@ -402,6 +415,15 @@ class Pass:
         main.screen.clear()
         return result
 
+    @staticmethod
+    def generate(node):
+        command = ['pass', 'generate', '-f', node]
+        if arg_no_symbols:
+            command.append('-n')
+        result = run(command, stdout=PIPE, stderr=PIPE, text=True)
+        main.screen.clear()
+        return result
+
 
 def unhandled_input(key):
     if key == 'q':
@@ -430,6 +452,7 @@ if __name__ == '__main__':
     arg_preview_layout = config.get('ui', 'preview_layout', 'side')
     arg_icon_dir = config.get('icon', 'dir', '/')
     arg_icon_file = config.get('icon', 'file', ' ')
+    arg_no_symbols = config.get('pass', 'no_symbols', 'false', boolean=True)
 
     Pass.extract_all()
     # UI

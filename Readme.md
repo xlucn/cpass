@@ -35,13 +35,13 @@ Basic common keybindings just work as you would use in a lot of other programs:
 
 For `pass` related operations:
 - `a` or 'i' will add a new password in current directory
+- `A` or 'I' will generate a new password in current directory
 - `e` edit current password
 - `z` toggle preview
 
 To-do ones
 
 - `d` will delete current password file or directory after user confirms
-- `A` will generate a new password in current directory
 - `/` will start a search
 - `D`, `Y`, `P` remove, copy and paste item
 - `y` + `y/G/a/[0-9]` copy contents in password
