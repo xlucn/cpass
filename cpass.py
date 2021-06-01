@@ -297,23 +297,17 @@ class UI(urwid.Frame):
             ('bright', '/{}'.format(self.listbox.root)),
         ])
 
-        # empty dir
-        if self.listbox.focus.node is None:
-            self.count_indicator.set_text("0/0")
-            self.preview.original_widget.set_text('')
-            return
-
         # update footer
         self.count_indicator.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
             len(self.listbox.body)
-        ))
+        ) if self.listbox.focus.node else "0/0")
 
         if self._preview_shown:
             self.update_preview()
 
-        node = self.listbox.focus.node
     def update_preview(self):
+        node = self.listbox.focus.text
         path = os.path.join(self.listbox.root, node)
 
         if path == self._last_preview:
@@ -322,6 +316,8 @@ class UI(urwid.Frame):
 
         if self.listbox.focus.isdir:
             preview = "\n".join([(f.icon + f.text) for f in Pass.all_pass[path]])
+        elif self.listbox.focus.node is None:
+            preview = ""
         else:
             preview = Pass.show(path)
         self.preview.original_widget.set_text(preview)
