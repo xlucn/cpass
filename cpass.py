@@ -195,7 +195,8 @@ class FolderWalker(list):
     def __init__(self, root, dirs, files):
         self.pos = 0  # cursor position
 
-        self[:] = [PassNode(f, root, f in dirs) for f in sorted(dirs) + sorted(files)]
+        self[:] = [PassNode(f, root, True) for f in sorted(dirs)] + \
+            [PassNode(f, root) for f in sorted(files)]
         if len(self) == 0:
             self[:] = [PassNode(None, None)]
 
