@@ -258,9 +258,8 @@ class UI(urwid.Frame):
             elif self._edit_type.startswith("insert"):
                 self.insert_getpass()
         elif self._edit_type is not None:
-            # pass through to edit widget
-            # NOTE: is this the right way to do it?
-            super().keypress(size, key)
+            # pass through to edit widget (the focused widget)
+            return super().keypress(size, key)
         elif key in ['/']:
             self._edit_type = "search"
             self.editbox.set_caption('/')
