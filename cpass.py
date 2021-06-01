@@ -209,8 +209,6 @@ class UI(urwid.Frame):
         self.update_preview_layout()
 
         super().__init__(self.middle, self.header_widget, self.footer_widget)
-        # manually update when first opening the program
-        self.update_view()
 
     def message(self, message, alert=False):
         self.messagebox.set_text(('alert' if alert else 'normal', message))
@@ -227,7 +225,7 @@ class UI(urwid.Frame):
         else:
             self.middle.contents = [(self.listbox, ('weight', 1, False))]
         self.middle.focus_position = 0
-        self.update_view()
+        self.update_preview()
 
     def keypress(self, size, key):
         debug("ui keypress: {} {}".format(key, size))
@@ -311,10 +309,11 @@ class UI(urwid.Frame):
             len(self.listbox.body)
         ))
 
-        if not self._preview_shown:
-            return
+        if self._preview_shown:
+            self.update_preview()
 
         node = self.listbox.focus.node
+    def update_preview(self):
         path = os.path.join(self.listbox.root, node)
 
         if path == self._last_preview:
