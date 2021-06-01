@@ -375,9 +375,10 @@ class MyConfigParser(configparser.RawConfigParser):
         if os.path.exists(CONFIG):
             self.read(CONFIG)
 
-    def get(self, section, option, fallback=None):
+    def get(self, section, option, fallback=None, boolean=False):
         try:
-            return super().get(section, option).strip("\"\'")
+            result = super().get(section, option)
+            return result == 'true' if boolean else result.strip("\"\'")
         except (configparser.NoOptionError, configparser.NoSectionError):
             return fallback
 
