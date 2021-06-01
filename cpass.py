@@ -324,7 +324,7 @@ class UI(urwid.Frame):
         if self.listbox.focus.isdir:
             preview = "\n".join([(f.icon + f.text) for f in Pass.all_pass[path]])
         else:
-            preview = Pass.show(node_full)
+            preview = Pass.show(path)
         self.preview.original_widget.set_text(preview)
 
 
