@@ -164,7 +164,7 @@ class PassList(urwid.ListBox):
         new_offset = min(max(new_offset, 0), size[1] - 1)
 
         self.change_focus(size, new_focus, offset_inset=new_offset)
-        self._ui.update_view()
+        self._ui.update_preview()
 
 
 class FolderWalker(list):
