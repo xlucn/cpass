@@ -202,9 +202,9 @@ class UI(urwid.Frame):
         self.listbox = PassList(self.walker, ui=self)
 
         # use Columns for horizonal layout, and Pile for vertical
-        if arg_preview in ['side', 'horizontal']:
+        if arg_preview_layout in ['side', 'horizontal']:
             self.middle = urwid.Columns([], dividechars=1)
-        elif arg_preview in ['bottom', 'vertical']:
+        elif arg_preview_layout in ['bottom', 'vertical']:
             self.middle = urwid.Pile([])
         self.update_preview_layout()
 
@@ -215,10 +215,10 @@ class UI(urwid.Frame):
 
     def update_preview_layout(self):
         if self._preview_shown:
-            if arg_preview in ['side', 'horizontal']:
+            if arg_preview_layout in ['side', 'horizontal']:
                 self.middle.contents = [(self.listbox, ('weight', 1, False)),
                                            (self.preview, ('weight', 1, False))]
-            if arg_preview in ['bottom', 'vertical']:
+            if arg_preview_layout in ['bottom', 'vertical']:
                 self.middle.contents = [(self.listbox, ('weight', 1)),
                                            (self.divider, ('pack', 1)),
                                            (self.preview, ('weight', 1))]
@@ -385,7 +385,7 @@ class MyConfigParser(configparser.RawConfigParser):
 
 if __name__ == '__main__':
     config = MyConfigParser()
-    arg_preview = config.get('ui', 'preview', 'side')
+    arg_preview_layout = config.get('ui', 'preview_layout', 'side')
     arg_icon_dir = config.get('icon', 'dir', '/')
     arg_icon_file = config.get('icon', 'file', ' ')
 
