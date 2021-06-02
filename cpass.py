@@ -121,12 +121,6 @@ class PassList(urwid.ListBox):
             # dummy delete
             if len(self.body) > 0:
                 self.delete(self.focus_position)
-        elif key in ['a', 'i', 'o']:
-            # dummy add
-            self.insert(PassNode('foonew', self.root))
-        elif key in ['A', 'I']:
-            # dummy generate
-            self.body.insert(self.focus_position, PassNode('foonew', self.root))
         elif key in ['e']:
             if not self.focus.isdir:
                 self._ui.message(Pass.edit(os.path.join(self.root, self.focus.node)))
