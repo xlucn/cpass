@@ -18,6 +18,7 @@ class Debug:
     def log(cls, message):
         if cls.if_debug:
             cls.dfile.write(message.rstrip('\n') + '\n')
+            cls.dfile.flush()
 
 
 class PassNode(urwid.AttrMap):
