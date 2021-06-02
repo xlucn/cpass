@@ -210,7 +210,7 @@ class UI(urwid.Frame):
         self._app_string = 'cPass'
         self._preview_shown = True
         self._edit_type = None
-        self._help_string = ' a/i:add e:edit z:toggle'
+        self._help_string = ' a:generate e:edit i:insert z:toggle'
 
         # widgets
         self.path_indicator = urwid.Text('', wrap='clip')
@@ -283,11 +283,11 @@ class UI(urwid.Frame):
             self._edit_type = "search"
             self.editbox.set_caption('/')
             self.focus_edit()
-        elif key in ['a', 'i']:
+        elif key in ['i']:
             self._edit_type = "insert"
             self.editbox.set_caption('Enter password filename: ')
             self.focus_edit()
-        elif key in ['A', 'I']:
+        elif key in ['a']:
             self._edit_type = "generate"
             self.editbox.set_caption('Generate a password file: ')
             self.focus_edit()
