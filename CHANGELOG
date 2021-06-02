@@ -1,3 +1,16 @@
+0.4.0 2021-06-02
+
+Added:
+
+- The UI actually updates with password operations like insert, generate, etc.
+- Generate password by `pass generate`.
+
+Changed:
+
+- Configuration option 'preview' is changed to 'preview_layout'.
+- Keybinding changes: only use 'i' for insert and only 'a' for generate.
+
+
 0.3.1  2021-05-30
 
 Hot fix release.
