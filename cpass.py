@@ -263,20 +263,7 @@ class UI(urwid.Frame):
             self.messagebox.set_text('')
             self.unfocus_edit()
         elif key in ['enter']:
-            if self._edit_type == "search":
-                # dummy search
-                self.unfocus_edit()
-            elif self._edit_type == "generate":
-                gen_path = os.path.join(self.listbox.root, self.editbox.edit_text)
-                res = Pass.generate(gen_path)
-                if res.returncode == 0:
-                    self.message("Generate: " + gen_path)
-                    self.listbox.insert(PassNode(self.editbox.edit_text, self.listbox.root))
-                else:
-                    self.message(res.stderr, alert=True)
-                self.unfocus_edit()
-            elif self._edit_type.startswith("insert"):
-                self.insert_getpass()
+            self.handle_input()
         elif self._edit_type is not None:
             # pass through to edit widget (the focused widget)
             return super().keypress(size, key)
@@ -309,9 +296,20 @@ class UI(urwid.Frame):
         self.set_focus('footer')
         self.editbox.set_edit_text('')
 
-    # TODO: this code is not good, put all editbox into its own class?
-    def insert_getpass(self):
-        if self._edit_type == "insert":
+    def handle_input(self):
+        if self._edit_type == "search":
+            # dummy search
+            self.unfocus_edit()
+        elif self._edit_type == "generate":
+            gen_path = os.path.join(self.listbox.root, self.editbox.edit_text)
+            res = Pass.generate(gen_path)
+            if res.returncode == 0:
+                self.message("Generate: " + gen_path)
+                self.listbox.insert(PassNode(self.editbox.edit_text, self.listbox.root))
+            else:
+                self.message(res.stderr, alert=True)
+            self.unfocus_edit()
+        elif self._edit_type == "insert":
             self._insert_node = self.editbox.edit_text
             self._insert_path = os.path.join(self.listbox.root, self.editbox.edit_text)
             self._edit_type = "insert_password"
