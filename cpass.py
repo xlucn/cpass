@@ -127,6 +127,8 @@ class PassList(urwid.ListBox):
                 res = Pass.edit(os.path.join(self.root, self.focus.node))
                 if res.returncode:
                     self._ui.message(res.stderr)
+                else:
+                    self._ui.update_preview(force=True)
         else:
             return super().keypress(size, key)
 
@@ -307,6 +309,7 @@ class UI(urwid.Frame):
             if res.returncode == 0:
                 self.message("Generate: " + gen_path)
                 self.listbox.insert(PassNode(self.editbox.edit_text, self.listbox.root))
+                self.update_preview(force=True)
             else:
                 self.message(res.stderr, alert=True)
             self.unfocus_edit()
@@ -333,6 +336,7 @@ class UI(urwid.Frame):
                 if res.returncode == 0:
                     self.message("Insert: " + self._insert_path)
                     self.listbox.insert(PassNode(self._insert_node, self.listbox.root))
+                    self.update_preview(force=True)
                 else:
                     self.message(res.stderr, alert=True)
             else:
@@ -353,14 +357,14 @@ class UI(urwid.Frame):
 
         self.update_preview()
 
-    def update_preview(self):
+    def update_preview(self, force=False):
         if not self._preview_shown:
             return
 
         node = self.listbox.focus.text
         path = os.path.join(self.listbox.root, node)
 
-        if path == self._last_preview:
+        if not force and path == self._last_preview:
             return
         self._last_preview = path
 
