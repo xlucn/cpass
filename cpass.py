@@ -240,7 +240,8 @@ class UI(urwid.Frame):
         super().__init__(self.middle, self.header_widget, self.footer_widget)
 
     def message(self, message, alert=False):
-        self.messagebox.set_text(('alert' if alert else 'normal', message))
+        self.messagebox.set_text(('alert' if alert else 'normal',
+                                  message.replace('\n', ' ')))
 
     def update_preview_layout(self):
         if self._preview_shown:
