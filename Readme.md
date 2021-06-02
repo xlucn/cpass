@@ -7,10 +7,11 @@
 ## Features:
 
 - browse local password store
+- pass operations, e.g., add, generate, edit
 
 ## Features to-be:
 
-- pass operations, e.g., add, remove, generate, edit, search
+- pass operations, e.g., remove, copy, move, search
 - copy password or other information
 - basic pass git operations and status
 
