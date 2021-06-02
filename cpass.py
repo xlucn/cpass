@@ -123,7 +123,9 @@ class PassList(urwid.ListBox):
                 self.delete(self.focus_position)
         elif key in ['e']:
             if not self.focus.isdir:
-                self._ui.message(Pass.edit(os.path.join(self.root, self.focus.node)))
+                res = Pass.edit(os.path.join(self.root, self.focus.node))
+                if res.returncode:
+                    self._ui.message(res.stderr)
         else:
             return super().keypress(size, key)
 
@@ -367,7 +369,11 @@ class UI(urwid.Frame):
         elif self.listbox.focus.node is None:
             preview = ""
         else:
-            preview = Pass.show(path)
+            res = Pass.show(path)
+            if res.returncode:
+                preview = res.stderr
+            else:
+                preview = res.stdout
         self.preview.original_widget.set_text(preview)
 
 
@@ -392,14 +398,14 @@ class Pass:
     def show(node):
         result = run(['pass', 'show', node], stdout=PIPE, stderr=PIPE, text=True)
         main.screen.clear()
-        return result.stderr if result.returncode else result.stdout
+        return result
 
     @staticmethod
     def edit(node):
         # can not pipe stdout because this will start vim
         result = run(['pass', 'edit', node], stderr=PIPE, text=True)
         main.screen.clear()
-        return result.stderr
+        return result
 
     @staticmethod
     def insert(node, password):
