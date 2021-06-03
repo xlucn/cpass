@@ -167,18 +167,20 @@ class PassList(urwid.ListBox):
         root_list = Pass.all_pass[self.root]
         if len(root_list) == 1 and root_list[0].node is None:
             root_list.pop()
-        root_list.insert(passnode)
+        inserted_pos = root_list.insert_sorted(passnode)
         # change listwalker
         self.body[:] = root_list
+        # focus the new node
+        self.set_focus(inserted_pos)
         self._ui.update_view()
 
     def delete(self, pos):
         # change stored list
         root_list = Pass.all_pass[self.root]
-        # change listwalker
         root_list.pop(pos)
         if len(root_list) == 0:
             root_list.append(PassNode(None, None))
+        # change listwalker
         self.body[:] = root_list
         self._ui.update_view()
 
@@ -192,12 +194,14 @@ class FolderWalker(list):
         if len(self) == 0:
             self[:] = [PassNode(None, None)]
 
-    def insert(self, node):
-        if node.node in [n.node for n in self]:
-            return
+    def insert_sorted(self, node):
+        node_list = [n.node for n in self]
+        if node.node in node_list:
+            return node_list.index(node.node)
         super().insert(self.pos, node)
         self[:] = sorted([n for n in self if n.isdir], key=lambda n: n.node) + \
             sorted([n for n in self if not n.isdir], key=lambda n: n.node)
+        return self.index(node)
 
 
 class UI(urwid.Frame):
