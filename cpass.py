@@ -7,7 +7,7 @@ import urwid
 import configparser
 from subprocess import run, PIPE
 
-version = "0.4.0"
+version = "0.4.1"
 
 
 class Debug:
