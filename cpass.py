@@ -122,13 +122,6 @@ class PassList(urwid.ListBox):
             # dummy delete
             if len(self.body) > 0:
                 self.delete(self.focus_position)
-        elif key in ['e']:
-            if not self.focus.isdir:
-                res = Pass.edit(os.path.join(self.root, self.focus.node))
-                if res.returncode:
-                    self._ui.message(res.stderr)
-                else:
-                    self._ui.update_preview(force=True)
         else:
             return super().keypress(size, key)
 
@@ -282,6 +275,14 @@ class UI(urwid.Frame):
             self._edit_type = "generate"
             self.editbox.set_caption('Generate a password file: ')
             self.focus_edit()
+        elif key in ['e']:
+            if self.listbox.focus.isdir:
+                return
+            res = Pass.edit(os.path.join(self.listbox.root, self.listbox.focus.node))
+            if res.returncode:
+                self.message(res.stderr)
+            else:
+                self.update_preview(force=True)
         elif key in ['z']:
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
