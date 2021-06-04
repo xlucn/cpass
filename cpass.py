@@ -168,10 +168,13 @@ class PassList(urwid.ListBox):
         if len(root_list) == 1 and root_list[0].node is None:
             root_list.pop()
         inserted_pos = root_list.insert_sorted(passnode)
+
         # change listwalker
         self.body[:] = root_list
+
         # focus the new node
         self.set_focus(inserted_pos)
+
         self._ui.update_view()
 
     def delete(self, pos):
@@ -180,8 +183,10 @@ class PassList(urwid.ListBox):
         root_list.pop(pos)
         if len(root_list) == 0:
             root_list.append(PassNode(None, None))
+
         # change listwalker
         self.body[:] = root_list
+
         self._ui.update_view()
 
 
@@ -191,13 +196,18 @@ class FolderWalker(list):
 
         self[:] = [PassNode(f, root, True) for f in sorted(dirs)] + \
             [PassNode(f, root) for f in sorted(files)]
+
+        # prevent empty list, which troubles listbox operations
         if len(self) == 0:
             self[:] = [PassNode(None, None)]
 
     def insert_sorted(self, node):
+        # if node already exist, return the index
         node_list = [n.node for n in self]
         if node.node in node_list:
             return node_list.index(node.node)
+
+        # insert and sort, with directories sorted before files
         super().insert(self.pos, node)
         self[:] = sorted([n for n in self if n.isdir], key=lambda n: n.node) + \
             sorted([n for n in self if not n.isdir], key=lambda n: n.node)
@@ -268,6 +278,7 @@ class UI(urwid.Frame):
             # pass through to edit widget (the focused widget)
             return super().keypress(size, key)
         elif key in ['/']:
+            # NOTE: the keybinding process is not ideal
             self._edit_type = "search"
             self.editbox.set_caption('/')
             self.focus_edit()
@@ -305,6 +316,7 @@ class UI(urwid.Frame):
         self.editbox.set_edit_text('')
 
     def handle_input(self):
+        # NOTE: to be improved
         if self._edit_type == "search":
             # dummy search
             self.unfocus_edit()
