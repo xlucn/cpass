@@ -279,14 +279,11 @@ class UI(urwid.Frame):
             return super().keypress(size, key)
         elif key in ['/']:
             # NOTE: the keybinding process is not ideal
-            self._edit_type = "search"
-            self.focus_edit('/')
+            self.focus_edit("search", '/')
         elif key in ['i']:
-            self._edit_type = "insert"
-            self.focus_edit('Enter password filename: ')
+            self.focus_edit("insert", 'Enter password filename: ')
         elif key in ['a']:
-            self._edit_type = "generate"
-            self.focus_edit('Generate a password file: ')
+            self.focus_edit("generate", 'Generate a password file: ')
         elif key in ['e']:
             if self.listbox.focus.isdir:
                 return
@@ -302,12 +299,13 @@ class UI(urwid.Frame):
             return super().keypress(size, key)
 
     def unfocus_edit(self):
+        self._edit_type = None
         self.contents['footer'] = (self.footer_widget, None)
         self.set_focus('body')
         self.editbox.set_mask(None)
-        self._edit_type = None
 
-    def focus_edit(self, cap='', mask=None):
+    def focus_edit(self, edit_type, cap='', mask=None):
+        self._edit_type = edit_type
         self.contents['footer'] = (self.editbox, None)
         self.set_focus('footer')
         self.editbox.set_caption(cap)
@@ -332,12 +330,10 @@ class UI(urwid.Frame):
         elif self._edit_type == "insert":
             self._insert_node = self.editbox.edit_text
             self._insert_path = os.path.join(self.listbox.root, self.editbox.edit_text)
-            self._edit_type = "insert_password"
-            self.focus_edit('Enter password: ', '*')
+            self.focus_edit("insert_password", 'Enter password: ', '*')
         elif self._edit_type == "insert_password":
             self._insert_pass = self.editbox.edit_text
-            self._edit_type = "insert_password_confirm"
-            self.focus_edit('Enter password again: ', '*')
+            self.focus_edit("insert_password_confirm", 'Enter password again: ', '*')
         elif self._edit_type == "insert_password_confirm":
             self._insert_pass_again = self.editbox.edit_text
             if self._insert_pass == self._insert_pass_again:
