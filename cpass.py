@@ -30,7 +30,7 @@ class PassNode(urwid.AttrMap):
         self.isdir = isdir
         self.text = node if node else "-- EMPTY --"
         self.path = os.path.join(root, node) if node else ''
-        self.icon = arg_icon_dir if isdir else arg_icon_file if node else ''
+        self.icon = config.icon_dir if isdir else config.icon_file if node else ''
         # topdown option in os.walk makes this possible
         self.count = str(len(Pass.all_pass[self.path])) if isdir else ''
 
@@ -230,9 +230,9 @@ class UI(urwid.Frame):
         self.listbox = PassList(self.walker, ui=self)
 
         # use Columns for horizonal layout, and Pile for vertical
-        if arg_preview_layout in ['side', 'horizontal']:
+        if config.preview_layout in ['side', 'horizontal']:
             self.middle = urwid.Columns([], dividechars=1)
-        elif arg_preview_layout in ['bottom', 'vertical']:
+        elif config.preview_layout in ['bottom', 'vertical']:
             self.middle = urwid.Pile([])
         self.update_preview_layout()
         self.update_view()
@@ -245,10 +245,10 @@ class UI(urwid.Frame):
 
     def update_preview_layout(self):
         if self._preview_shown:
-            if arg_preview_layout in ['side', 'horizontal']:
+            if config.preview_layout in ['side', 'horizontal']:
                 self.middle.contents = [(self.listbox, ('weight', 1, False)),
                                         (self.preview, ('weight', 1, False))]
-            if arg_preview_layout in ['bottom', 'vertical']:
+            if config.preview_layout in ['bottom', 'vertical']:
                 self.middle.contents = [(self.listbox, ('weight', 1)),
                                         (self.divider, ('pack', 1)),
                                         (self.preview, ('weight', 1))]
@@ -427,7 +427,7 @@ class Pass:
     @staticmethod
     def generate(node):
         command = ['pass', 'generate', '-f', node]
-        if arg_no_symbols:
+        if config.no_symbols:
             command.append('-n')
         result = run(command, stdout=PIPE, stderr=PIPE, text=True)
         main.screen.clear()
@@ -448,6 +448,11 @@ class MyConfigParser(configparser.RawConfigParser):
         if os.path.exists(CONFIG):
             self.read(CONFIG)
 
+        self.preview_layout = self.get('ui', 'preview_layout', 'side')
+        self.icon_dir = self.get('icon', 'dir', '/')
+        self.icon_file = self.get('icon', 'file', ' ')
+        self.no_symbols = self.get('pass', 'no_symbols', 'false', boolean=True)
+
     def get(self, section, option, fallback=None, boolean=False):
         try:
             result = super().get(section, option)
@@ -458,10 +463,6 @@ class MyConfigParser(configparser.RawConfigParser):
 
 if __name__ == '__main__':
     config = MyConfigParser()
-    arg_preview_layout = config.get('ui', 'preview_layout', 'side')
-    arg_icon_dir = config.get('icon', 'dir', '/')
-    arg_icon_file = config.get('icon', 'file', ' ')
-    arg_no_symbols = config.get('pass', 'no_symbols', 'false', boolean=True)
 
     Pass.extract_all()
     # UI
