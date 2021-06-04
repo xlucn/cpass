@@ -280,16 +280,13 @@ class UI(urwid.Frame):
         elif key in ['/']:
             # NOTE: the keybinding process is not ideal
             self._edit_type = "search"
-            self.editbox.set_caption('/')
-            self.focus_edit()
+            self.focus_edit('/')
         elif key in ['i']:
             self._edit_type = "insert"
-            self.editbox.set_caption('Enter password filename: ')
-            self.focus_edit()
+            self.focus_edit('Enter password filename: ')
         elif key in ['a']:
             self._edit_type = "generate"
-            self.editbox.set_caption('Generate a password file: ')
-            self.focus_edit()
+            self.focus_edit('Generate a password file: ')
         elif key in ['e']:
             if self.listbox.focus.isdir:
                 return
@@ -310,9 +307,11 @@ class UI(urwid.Frame):
         self.editbox.set_mask(None)
         self._edit_type = None
 
-    def focus_edit(self):
+    def focus_edit(self, cap='', mask=None):
         self.contents['footer'] = (self.editbox, None)
         self.set_focus('footer')
+        self.editbox.set_caption(cap)
+        self.editbox.set_mask(mask)
         self.editbox.set_edit_text('')
 
     def handle_input(self):
@@ -334,20 +333,13 @@ class UI(urwid.Frame):
             self._insert_node = self.editbox.edit_text
             self._insert_path = os.path.join(self.listbox.root, self.editbox.edit_text)
             self._edit_type = "insert_password"
-            self.editbox.set_caption('Enter password: ')
-            self.editbox.set_mask("*")
-            self.editbox.set_edit_text('')
+            self.focus_edit('Enter password: ', '*')
         elif self._edit_type == "insert_password":
             self._insert_pass = self.editbox.edit_text
             self._edit_type = "insert_password_confirm"
-            self.editbox.set_caption('Enter password again: ')
-            self.editbox.set_mask("*")
-            self.editbox.set_edit_text('')
+            self.focus_edit('Enter password again: ', '*')
         elif self._edit_type == "insert_password_confirm":
             self._insert_pass_again = self.editbox.edit_text
-            self.editbox.set_mask(None)
-            self.editbox.set_edit_text('')
-            self.unfocus_edit()
             if self._insert_pass == self._insert_pass_again:
                 res = Pass.insert(self._insert_path, self._insert_pass)
                 if res.returncode == 0:
@@ -358,6 +350,7 @@ class UI(urwid.Frame):
                     self.message(res.stderr, alert=True)
             else:
                 self.message("Password is not the same", alert=True)
+            self.unfocus_edit()
 
     def update_view(self):
         # update header
