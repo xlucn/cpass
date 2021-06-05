@@ -317,7 +317,7 @@ class UI(urwid.Frame):
             # dummy search
             self.unfocus_edit()
         elif self._edit_type == "generate":
-            self.generate(self.editbox.edit_text, self.listbox.root)
+            self.run_pass(Pass.generate, self.editbox.edit_text, self.listbox.root, "Generate: ")
             self.unfocus_edit()
         elif self._edit_type == "insert":
             self._insert_node = self.editbox.edit_text
@@ -328,7 +328,8 @@ class UI(urwid.Frame):
         elif self._edit_type == "insert_password_confirm":
             self._insert_pass_again = self.editbox.edit_text
             if self._insert_pass == self._insert_pass_again:
-                self.insert(self._insert_node, self.listbox.root, self._insert_pass)
+                self.run_pass(Pass.insert, self._insert_node, self.listbox.root,
+                              "Insert: ", (self._insert_pass,))
             else:
                 self.message("Password is not the same", alert=True)
             self.unfocus_edit()
@@ -371,21 +372,11 @@ class UI(urwid.Frame):
                 preview = res.stdout
         self.preview.original_widget.set_text(preview)
 
-    def generate(self, node, root):
+    def run_pass(self, func, node, root, msg, args=()):
         path = os.path.join(root, node)
-        res = Pass.generate(path)
+        res = func(path, *args)
         if res.returncode == 0:
-            self.message("Generate: " + path)
-            self.listbox.insert(PassNode(node, root))
-            self.update_preview(force=True)
-        else:
-            self.message(res.stderr, alert=True)
-
-    def insert(self, node, root, password):
-        path = os.path.join(root, node)
-        res = Pass.insert(path, password)
-        if res.returncode == 0:
-            self.message("Insert: " + path)
+            self.message(msg + path)
             self.listbox.insert(PassNode(node, root))
             self.update_preview(force=True)
         else:
