@@ -285,11 +285,7 @@ class UI(urwid.Frame):
         elif key in ['e']:
             if self.listbox.focus.isdir:
                 return
-            res = Pass.edit(os.path.join(self.listbox.root, self.listbox.focus.node))
-            if res.returncode:
-                self.message(res.stderr)
-            else:
-                self.update_preview(force=True)
+            self.run_pass(Pass.edit, self.listbox.focus.node, self.listbox.root, "Edit: ")
         elif key in ['z']:
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
