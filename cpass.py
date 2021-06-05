@@ -270,7 +270,6 @@ class UI(urwid.Frame):
     def keypress(self, size, key):
         Debug.log("ui keypress: {} {}".format(key, size))
         if key in ['esc']:
-            self.messagebox.set_text('')
             self.unfocus_edit()
         elif key in ['enter']:
             self.handle_input()
@@ -301,6 +300,7 @@ class UI(urwid.Frame):
         self._edit_type = None
         self.contents['footer'] = (self.footer_widget, None)
         self.set_focus('body')
+        self.messagebox.set_text('')
         self.editbox.set_mask(None)
 
     def focus_edit(self, edit_type, cap='', mask=None):
