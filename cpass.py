@@ -272,7 +272,7 @@ class UI(urwid.Frame):
         elif self._edit_type == "delete":
             self.unfocus_edit()
             self.delete_confirm(key)
-        elif key in ['enter']:
+        elif key in ['enter'] and self._edit_type is not None:
             self.handle_input()
         elif self._edit_type is not None:
             # pass through to edit widget (the focused widget)
