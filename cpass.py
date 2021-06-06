@@ -287,8 +287,10 @@ class UI(urwid.Frame):
             self.run_pass(Pass.edit, self.listbox.focus.node, self.listbox.root,
                           "Edit: {root}/{node}")
         elif key in ['d']:
-            self.focus_edit("delete", 'Are you sure to delete {}? [Y/n]'
-                            .format(self.listbox.focus.node))
+            self.focus_edit("delete", 'Are you sure to delete {} {}? [Y/n]'.format(
+                "the whole folder" if self.listbox.focus.isdir else "the file",
+                self.listbox.focus.node
+            ))
         elif key in ['z']:
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
