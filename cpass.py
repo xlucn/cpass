@@ -284,8 +284,9 @@ class UI(urwid.Frame):
             self.focus_edit("insert", 'Enter password filename: ')
         elif key in ['a']:
             self.focus_edit("generate", 'Generate a password file: ')
-            self.run_pass(Pass.edit, self.listbox.focus.node, self.listbox.root, "Edit: ")
         elif key in ['e'] and not self.listbox.focus.isdir:
+            self.run_pass(Pass.edit, self.listbox.focus.node, self.listbox.root,
+                          "Edit: {root}/{node}")
         elif key in ['z']:
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
@@ -313,7 +314,8 @@ class UI(urwid.Frame):
             # dummy search
             self.unfocus_edit()
         elif self._edit_type == "generate":
-            self.run_pass(Pass.generate, self.editbox.edit_text, self.listbox.root, "Generate: ")
+            self.run_pass(Pass.generate, self.editbox.edit_text, self.listbox.root,
+                          "Generate:  {root}/{node}")
             self.unfocus_edit()
         elif self._edit_type == "insert":
             self._insert_node = self.editbox.edit_text
@@ -325,7 +327,7 @@ class UI(urwid.Frame):
             self._insert_pass_again = self.editbox.edit_text
             if self._insert_pass == self._insert_pass_again:
                 self.run_pass(Pass.insert, self._insert_node, self.listbox.root,
-                              "Insert: ", (self._insert_pass,))
+                              "Insert:  {root}/{node}", (self._insert_pass,))
             else:
                 self.message("Password is not the same", alert=True)
             self.unfocus_edit()
@@ -372,7 +374,7 @@ class UI(urwid.Frame):
         path = os.path.join(root, node)
         res = func(path, *args)
         if res.returncode == 0:
-            self.message(msg + path)
+            self.message(msg.format(root=root, node=node))
             self.listbox.insert(node)
             self.update_preview(force=True)
         else:
