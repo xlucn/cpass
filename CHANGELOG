@@ -1,3 +1,15 @@
+0.5.0 2021-06-07
+
+Added:
+
+- Deleting passwords/folders with `pass rm -r`.
+
+Fixed:
+
+- Previous messages might persist after unfocusing the editbox.
+- Enter key not working on folders.
+
+
 0.4.1 2021-06-03
 
 Added:

@@ -7,11 +7,11 @@
 ## Features:
 
 - browse local password store
-- pass operations, e.g., add, generate, edit
+- pass operations, e.g., add, generate, edit, remove
 
 ## Features to-be:
 
-- pass operations, e.g., remove, copy, move, search
+- pass operations, e.g., copy, move, search
 - copy password or other information
 - basic pass git operations and status
 
@@ -37,6 +37,7 @@ Basic common keybindings just work as you would use in a lot of other programs:
 For `pass` related operations:
 - `i` will add a new password in current directory
 - `a` will generate a new password in current directory
+- `d` will delete current password file or directory after user confirms
 - `e` edit current password
 - `z` toggle preview
 
@@ -44,7 +45,7 @@ To-do ones
 
 - `I` to add multiline password
 - `A` to generate with more options
-- `d` will delete current password file or directory after user confirms
+- `r` rename the file
 - `/` will start a search
 - `D`, `Y`, `P` remove, copy and paste item
 - `y` + `y/G/a/[0-9]` copy contents in password
