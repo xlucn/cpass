@@ -284,10 +284,8 @@ class UI(urwid.Frame):
             self.focus_edit("insert", 'Enter password filename: ')
         elif key in ['a']:
             self.focus_edit("generate", 'Generate a password file: ')
-        elif key in ['e']:
-            if self.listbox.focus.isdir:
-                return
             self.run_pass(Pass.edit, self.listbox.focus.node, self.listbox.root, "Edit: ")
+        elif key in ['e'] and not self.listbox.focus.isdir:
         elif key in ['z']:
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
