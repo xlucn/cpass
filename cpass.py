@@ -118,10 +118,6 @@ class PassList(urwid.ListBox):
             self.list_navigate(size, list_navigations[key])
         elif key in dir_navigations:
             self.dir_navigate(dir_navigations[key])
-        elif key in ['d']:
-            # dummy delete
-            if len(self.body) > 0:
-                self.delete(self.focus_position)
         else:
             return super().keypress(size, key)
 
@@ -273,6 +269,9 @@ class UI(urwid.Frame):
         Debug.log("ui keypress: {} {}".format(key, size))
         if key in ['esc']:
             self.unfocus_edit()
+        elif self._edit_type == "delete":
+            self.unfocus_edit()
+            self.delete_confirm(key)
         elif key in ['enter']:
             self.handle_input()
         elif self._edit_type is not None:
@@ -287,6 +286,9 @@ class UI(urwid.Frame):
         elif key in ['e'] and not self.listbox.focus.isdir:
             self.run_pass(Pass.edit, self.listbox.focus.node, self.listbox.root,
                           "Edit: {root}/{node}")
+        elif key in ['d']:
+            self.focus_edit("delete", 'Are you sure to delete {}? [Y/n]'
+                            .format(self.listbox.focus.node))
         elif key in ['z']:
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
@@ -380,6 +382,21 @@ class UI(urwid.Frame):
         else:
             self.message(res.stderr, alert=True)
 
+    def delete_confirm(self, key):
+        if key in ['y', 'Y', 'enter']:
+            path = os.path.join(self.listbox.root, self.listbox.focus.node)
+            res = Pass.delete(path)
+            if res.returncode == 0:
+                self.message("Deleting {}".format(path))
+                self.listbox.delete(self.listbox.focus_position)
+                self.update_preview(force=True)
+            else:
+                self.message(res.stderr, alert=True)
+        elif key in ['n', 'N']:
+            self.message("Abort.")
+        else:
+            self.message("Invalid option.", alert=True)
+
 
 class Pass:
     FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
@@ -426,6 +443,12 @@ class Pass:
             command.append('-n')
         result = run(command, stdout=PIPE, stderr=PIPE, text=True)
         main.screen.clear()
+        return result
+
+    @staticmethod
+    def delete(node):
+        command = ['pass', 'rm', '-r', '-f', node]
+        result = run(command, stdout=PIPE, stderr=PIPE, text=True)
         return result
 
 
