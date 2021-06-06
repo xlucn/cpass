@@ -162,7 +162,9 @@ class PassList(urwid.ListBox):
         self.change_focus(size, new_focus, offset_inset=new_offset)
         self._ui.update_preview()
 
-    def insert(self, passnode):
+    def insert(self, node):
+        passnode = PassNode(node, self.root)
+
         # change stored list
         root_list = Pass.all_pass[self.root]
         if len(root_list) == 1 and root_list[0].node is None:
@@ -373,7 +375,7 @@ class UI(urwid.Frame):
         res = func(path, *args)
         if res.returncode == 0:
             self.message(msg + path)
-            self.listbox.insert(PassNode(node, root))
+            self.listbox.insert(node)
             self.update_preview(force=True)
         else:
             self.message(res.stderr, alert=True)
