@@ -322,13 +322,13 @@ class UI(urwid.Frame):
             self._insert_pass = self.editbox.edit_text
             self.focus_edit("insert_password_confirm", 'Enter password again: ', '*')
         elif self._edit_type == "insert_password_confirm":
+            self.unfocus_edit()
             self._insert_pass_again = self.editbox.edit_text
             if self._insert_pass == self._insert_pass_again:
                 self.run_pass(Pass.insert, self._insert_node, self.listbox.root,
                               "Insert:  {root}/{node}", (self._insert_pass,))
             else:
                 self.message("Password is not the same", alert=True)
-            self.unfocus_edit()
 
     def update_view(self):
         # update header
