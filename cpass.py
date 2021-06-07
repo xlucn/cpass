@@ -86,38 +86,29 @@ class PassList(urwid.ListBox):
     def keypress(self, size, key):
         Debug.log("passlist keypress: {} {}".format(key, size))
 
-        list_navigations = {
-            'j': 1,
-            'k': -1,
+        list_navigation_offsets = {
             'down': 1,
             'up': -1,
-            'ctrl n': 1,
-            'ctrl p': -1,
-            'ctrl f': size[1],
-            'ctrl b': -size[1],
-            'ctrl d': size[1] // 2,
-            'ctrl u': -size[1] // 2,
-            'page up': -size[1],
-            'page down': size[1],
-            # overshoot to go to bottom/top
-            'G': len(self.body),
-            'g': -len(self.body),
             'end': len(self.body),
             'home': -len(self.body),
+            'down_screen': size[1],
+            'up_screen': -size[1],
+            'down_half_screen': size[1] // 2,
+            'up_half_screen': -size[1] // 2,
+            # overshoot to go to bottom/top
         }
 
-        dir_navigations = {
-            'l':     'down',
-            'h':     'up',
-            'right': 'down',
-            'left':  'up',
-            'enter': 'down',
+        dir_navigation_directions = {
+            'confirm': 'down',  # the confirm key doubles as enter folder key
+            'dir_down': 'down',
+            'dir_up':   'up',
         }
 
-        if key in list_navigations:
-            self.list_navigate(size, list_navigations[key])
-        elif key in dir_navigations:
-            self.dir_navigate(dir_navigations[key])
+        action = keys.get(key)
+        if action in list_navigation_offsets:
+            self.list_navigate(size, list_navigation_offsets[action])
+        elif action in dir_navigation_directions:
+            self.dir_navigate(dir_navigation_directions[action])
         else:
             return super().keypress(size, key)
 
@@ -267,31 +258,34 @@ class UI(urwid.Frame):
 
     def keypress(self, size, key):
         Debug.log("ui keypress: {} {}".format(key, size))
-        if key in ['esc']:
+        action = keys.get(key)
+        if action == 'cancel':
             self.unfocus_edit()
+        elif action == 'quit' and self._edit_type is None:
+            raise urwid.ExitMainLoop
         elif self._edit_type == "delete":
             self.unfocus_edit()
             self.delete_confirm(key)
-        elif key in ['enter'] and self._edit_type is not None:
+        elif action == 'confirm' and self._edit_type is not None:
             self.handle_input()
         elif self._edit_type is not None:
             # pass through to edit widget (the focused widget)
             return super().keypress(size, key)
-        elif key in ['/']:
+        elif action == 'search':
             self.focus_edit("search", '/')
-        elif key in ['i']:
+        elif action == 'insert':
             self.focus_edit("insert", 'Enter password filename: ')
-        elif key in ['a']:
+        elif action == 'generate':
             self.focus_edit("generate", 'Generate a password file: ')
-        elif key in ['e'] and not self.listbox.focus.isdir:
+        elif action == 'edit' and not self.listbox.focus.isdir:
             self.run_pass(Pass.edit, self.listbox.focus.node, self.listbox.root,
                           "Edit: {root}/{node}")
-        elif key in ['d']:
+        elif action == 'delete':
             self.focus_edit("delete", 'Are you sure to delete {} {}? [Y/n]'.format(
                 "the whole folder" if self.listbox.focus.isdir else "the file",
                 self.listbox.focus.node
             ))
-        elif key in ['z']:
+        elif action == 'toggle_preview':
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
         else:
@@ -454,11 +448,6 @@ class Pass:
         return result
 
 
-def unhandled_input(key):
-    if key == 'q':
-        raise urwid.ExitMainLoop
-
-
 class MyConfigParser(configparser.RawConfigParser):
     def __init__(self):
         DEFAULT_CONFIG_DIR = os.path.join(os.getenv("HOME"), ".config")
@@ -488,6 +477,37 @@ if __name__ == '__main__':
     # UI
     passui = UI()
 
+    action_keys = {
+        'dir_down': ['l', 'right'],
+        'dir_up': ['h', 'left'],
+        'down': ['j', 'down', 'ctrl n'],
+        'up': ['k', 'up', 'ctrl p'],
+        'down_screen': ['page down', 'ctrl f'],
+        'up_screen': ['page up', 'ctrl b'],
+        'down_half_screen': ['ctrl d'],
+        'up_half_screen': ['ctrl u'],
+        'end': ['G', 'end'],
+        'home': ['g', 'home'],
+        'cancel': ['esc'],
+        'confirm': ['enter'],
+        'search': ['s'],
+        'insert': ['i'],
+        'generate': ['a'],
+        'edit': ['e'],
+        'delete': ['d'],
+        'copy': ['c'],
+        'toggle_preview': ['z'],
+        'quit': ['q']
+    }
+    keys = {}
+    for action in action_keys:
+        keys.update({key: action for key in action_keys[action]})
+    # update from configuration file
+    if config.has_section('keys'):
+        for action in config.options('keys'):
+            for key in re.split(',\\s*', config.get('keys', action, '')):
+                keys[key] = action
+
     palette = [
         # name          fg              bg              style
         ('normal',      'default',      'default'),
@@ -505,7 +525,7 @@ if __name__ == '__main__':
             palette[palette.index(attr)] = (attr[0], *re.split(',\\s*', colors))
 
     # main loop
-    main = urwid.MainLoop(passui, unhandled_input=unhandled_input, palette=palette)
+    main = urwid.MainLoop(passui, palette=palette)
     # set no timeout after escape key
     main.screen.set_input_timeouts(complete_wait=0)
     main.run()
