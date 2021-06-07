@@ -7,6 +7,7 @@
 ## Features:
 
 - browse local password store
+- color, key binding and other customizations through configuration file
 - pass operations, e.g., add, generate, edit, remove
 
 ## Features to-be:
@@ -27,6 +28,10 @@ Make sure you are using a local password store compatible with [`pass`](https://
 ### Start `cpass`
 
 To be determined.
+
+### Configuration file
+
+Some appearances or behaviors in the program can be customized through a configuration file located at `$XDG_CONFIG_DIR/cpass/cpass.cfg` or `$HOME/.config/cpass/cpass.cfg`. Most importantly, the key bindings and colors can be changed. For more details see the comments in the example `cpass.cfg` provided in the repo.
 
 ### Keybindings
 
