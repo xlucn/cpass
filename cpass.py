@@ -286,7 +286,7 @@ class UI(urwid.Frame):
         elif action == 'delete':
             self.focus_edit("delete", 'Are you sure to delete {} {}? [Y/n]'.format(
                 "the whole folder" if self.listbox.focus.isdir else "the file",
-                self.listbox.focus.node
+                os.path.join('/', self.listbox.root, self.listbox.focus.node)
             ))
         elif action == 'toggle_preview':
             self._preview_shown = not self._preview_shown
