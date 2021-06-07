@@ -31,7 +31,8 @@ class PassNode(urwid.AttrMap):
         self.text = node if node else "-- EMPTY --"
         self.path = os.path.join(root, node) if node else ''
         self.icon = config.icon_dir if isdir else config.icon_file if node else ''
-        # topdown option in os.walk makes this possible
+        # topdown option in os.walk makes this possible,
+        # so that children folders are traversed before its parent
         self.count = str(len(Pass.all_pass[self.path])) if isdir else ''
 
         super().__init__(urwid.Columns([
@@ -203,6 +204,8 @@ class FolderWalker(list):
         return self.index(node)
 
 
+# TODO: update count
+# TODO: background preview
 class UI(urwid.Frame):
     def __init__(self):
         self._last_preview = None
@@ -307,7 +310,7 @@ class UI(urwid.Frame):
         self.editbox.set_edit_text('')
 
     def handle_input(self):
-        # NOTE: to be improved
+        # NOTE: to be improved, when to unfocus?
         if self._edit_type == "search":
             # dummy search
             self.unfocus_edit()
