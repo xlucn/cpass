@@ -520,7 +520,7 @@ if __name__ == '__main__':
     ]
     # update from configuration file
     for attr in palette:
-        colors = config.get('color', attr[0])
+        colors = config.get('color', attr[0], ','.join(attr[1:]))
         if colors:
             palette[palette.index(attr)] = (attr[0], *re.split(',\\s*', colors))
 
