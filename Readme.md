@@ -6,6 +6,8 @@ DISCLAIMER: I do not guarantee that this program always runs as intended, so bac
 
 `cpass` tries to achieve a minimal, clean interface and utilizes vim-like keybinding. Also, thanks to the urwid module, mouse is supported quite well.
 
+![](https://github.com/OliverLew/oliverlew.github.io/blob/pictures/cpass.png?raw=true)
+
 ## Features:
 
 - Browse the local password store
