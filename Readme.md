@@ -17,9 +17,10 @@ DISCLAIMER: I do not guarantee that this program always runs as intended, so bac
 
 ## Features to-be:
 
-- Password file operations, e.g., copy, move, search
 - Copy password in various ways, e.g., first line, all lines, specific field (also customizable)
+- Search password files
 - Basic pass git operations and status indicator
+- Password file operations, e.g., copy, move, rename (low priority, since can be done with file managers)
 
 ## Requirement
 
