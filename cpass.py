@@ -310,14 +310,13 @@ class UI(urwid.Frame):
         self.editbox.set_edit_text('')
 
     def handle_input(self):
-        # NOTE: to be improved, when to unfocus?
         if self._edit_type == "search":
             # dummy search
             self.unfocus_edit()
         elif self._edit_type == "generate":
+            self.unfocus_edit()
             self.run_pass(Pass.generate, self.listbox.insert,
                           self.editbox.edit_text, self.listbox.root, "Generate: {}")
-            self.unfocus_edit()
         elif self._edit_type == "insert":
             self._insert_node = self.editbox.edit_text
             self.focus_edit("insert_password", 'Enter password: ', '*')
@@ -366,10 +365,7 @@ class UI(urwid.Frame):
             preview = ""
         else:
             res = Pass.show(path)
-            if res.returncode:
-                preview = res.stderr
-            else:
-                preview = res.stdout
+            preview = res.stderr if res.returncode else res.stdout
         self.preview.original_widget.set_text(preview)
 
     def run_pass(self, func, lfunc, node, root, msg, args=(), largs=()):
