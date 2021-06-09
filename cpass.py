@@ -281,8 +281,8 @@ class UI(urwid.Frame):
         elif action == 'generate':
             self.focus_edit("generate", 'Generate a password file: ')
         elif action == 'edit' and not self.listbox.focus.isdir:
-            self.run_pass(Pass.edit, self.listbox.focus.node, self.listbox.root,
-                          "Edit: {root}/{node}")
+            self.run_pass(Pass.edit, self.listbox.insert,
+                          self.listbox.focus.node, self.listbox.root, "Edit: {}")
         elif action == 'delete':
             self.focus_edit("delete", 'Are you sure to delete {} {}? [Y/n]'.format(
                 "the whole folder" if self.listbox.focus.isdir else "the file",
@@ -315,8 +315,8 @@ class UI(urwid.Frame):
             # dummy search
             self.unfocus_edit()
         elif self._edit_type == "generate":
-            self.run_pass(Pass.generate, self.editbox.edit_text, self.listbox.root,
-                          "Generate:  {root}/{node}")
+            self.run_pass(Pass.generate, self.listbox.insert,
+                          self.editbox.edit_text, self.listbox.root, "Generate: {}")
             self.unfocus_edit()
         elif self._edit_type == "insert":
             self._insert_node = self.editbox.edit_text
@@ -328,8 +328,9 @@ class UI(urwid.Frame):
             self.unfocus_edit()
             self._insert_pass_again = self.editbox.edit_text
             if self._insert_pass == self._insert_pass_again:
-                self.run_pass(Pass.insert, self._insert_node, self.listbox.root,
-                              "Insert:  {root}/{node}", (self._insert_pass,))
+                self.run_pass(Pass.insert, self.listbox.insert,
+                              self._insert_node, self.listbox.root, "Insert: {}",
+                              args=(self._insert_pass,))
             else:
                 self.message("Password is not the same", alert=True)
 
@@ -371,26 +372,24 @@ class UI(urwid.Frame):
                 preview = res.stdout
         self.preview.original_widget.set_text(preview)
 
-    def run_pass(self, func, node, root, msg, args=()):
+    def run_pass(self, func, lfunc, node, root, msg, args=(), largs=()):
         path = os.path.join(root, node)
         res = func(path, *args)
         if res.returncode == 0:
-            self.message(msg.format(root=root, node=node))
-            self.listbox.insert(node)
+            self.message(msg.format(path))
+            if lfunc == self.listbox.insert:
+                lfunc(node)
+            elif lfunc == self.listbox.delete:
+                lfunc(largs[0])
             self.update_preview(force=True)
         else:
             self.message(res.stderr, alert=True)
 
     def delete_confirm(self, key):
         if key in ['y', 'Y', 'enter']:
-            path = os.path.join(self.listbox.root, self.listbox.focus.node)
-            res = Pass.delete(path)
-            if res.returncode == 0:
-                self.message("Deleting {}".format(path))
-                self.listbox.delete(self.listbox.focus_position)
-                self.update_preview(force=True)
-            else:
-                self.message(res.stderr, alert=True)
+            self.run_pass(Pass.delete, self.listbox.delete,
+                          self.listbox.focus.node, self.listbox.root,
+                          "Deleting {}", largs=(self.listbox.focus_position,))
         elif key in ['n', 'N']:
             self.message("Abort.")
         else:
