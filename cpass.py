@@ -386,7 +386,7 @@ class UI(urwid.Frame):
             self.message(res.stderr, alert=True)
 
     def delete_confirm(self, key):
-        if key in ['y', 'Y', 'enter']:
+        if key in ['y', 'Y', 'd', 'enter']:
             self.run_pass(Pass.delete, self.listbox.delete,
                           self.listbox.focus.node, self.listbox.root,
                           "Deleting {}", largs=(self.listbox.focus_position,))
