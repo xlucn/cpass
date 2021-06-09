@@ -1,24 +1,15 @@
 #!/usr/bin/env python3
 # Author: Lu Xu <oliver_lew at outlook dot com>
 # License: MIT License Copyright (c) 2021 Lu Xu
+
 import os
 import re
 import urwid
+import logging
 import configparser
 from subprocess import run, PIPE
 
 version = "0.6.0"
-
-
-class Debug:
-    dfile = open('log', 'a')
-    if_debug = os.getenv('DEBUG')
-
-    @classmethod
-    def log(cls, message):
-        if cls.if_debug:
-            cls.dfile.write(message.rstrip('\n') + '\n')
-            cls.dfile.flush()
 
 
 class PassNode(urwid.AttrMap):
@@ -58,7 +49,7 @@ class PassList(urwid.ListBox):
     def mouse_event(self, size, event, button, col, row, focus):
         focus_offset = self.get_focus_offset_inset(size)[0]
 
-        Debug.log("passlist mouse event: {} {} {} {} {} {} {} {}".format(
+        logging.debug("passlist mouse event: {} {} {} {} {} {} {} {}".format(
             size, event, button, col, row, focus, self.focus_position, focus_offset
         ))
 
@@ -85,7 +76,7 @@ class PassList(urwid.ListBox):
             return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size, key):
-        Debug.log("passlist keypress: {} {}".format(key, size))
+        logging.debug("passlist keypress: {} {}".format(key, size))
 
         list_navigation_offsets = {
             'down': 1,
@@ -114,7 +105,7 @@ class PassList(urwid.ListBox):
             return super().keypress(size, key)
 
     def dir_navigate(self, direction):
-        Debug.log("body length: {}".format(len(self.body)))
+        logging.debug("body length: {}".format(len(self.body)))
 
         # record current position
         Pass.all_pass[self.root].pos = self.focus_position
@@ -260,7 +251,7 @@ class UI(urwid.Frame):
         self.middle.focus_position = 0
 
     def keypress(self, size, key):
-        Debug.log("ui keypress: {} {}".format(key, size))
+        logging.debug("ui keypress: {} {}".format(key, size))
         action = keys.get(key)
         if action == 'cancel':
             self.unfocus_edit()
@@ -469,6 +460,9 @@ class MyConfigParser(configparser.RawConfigParser):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='log',
+                        level=(logging.INFO if os.getenv('DEBUG') else logging.INFO))
+
     config = MyConfigParser()
 
     Pass.extract_all()
