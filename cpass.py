@@ -96,7 +96,7 @@ class PassList(urwid.ListBox):
             'dir_up':   'up',
         }
 
-        action = keys.get(key)
+        action = keybindings.get(key)
         if action in list_navigation_offsets:
             self.list_navigate(size, list_navigation_offsets[action])
         elif action in dir_navigation_directions:
@@ -252,7 +252,7 @@ class UI(urwid.Frame):
 
     def keypress(self, size, key):
         logging.debug("ui keypress: {} {}".format(key, size))
-        action = keys.get(key)
+        action = keybindings.get(key)
         if action == 'cancel':
             self.unfocus_edit()
         elif action == 'quit' and self._edit_type is None:
@@ -458,65 +458,72 @@ class MyConfigParser(configparser.RawConfigParser):
         except (configparser.NoOptionError, configparser.NoSectionError):
             return fallback
 
+    def get_keybindings(self):
+        action_keys = {
+            'dir_down': ['l', 'right'],
+            'dir_up': ['h', 'left'],
+            'down': ['j', 'down', 'ctrl n'],
+            'up': ['k', 'up', 'ctrl p'],
+            'down_screen': ['page down', 'ctrl f'],
+            'up_screen': ['page up', 'ctrl b'],
+            'down_half_screen': ['ctrl d'],
+            'up_half_screen': ['ctrl u'],
+            'end': ['G', 'end'],
+            'home': ['g', 'home'],
+            'cancel': ['esc'],
+            'confirm': ['enter'],
+            'search': ['s'],
+            'insert': ['i'],
+            'generate': ['a'],
+            'edit': ['e'],
+            'delete': ['d'],
+            'copy': ['c'],
+            'toggle_preview': ['z'],
+            'quit': ['q']
+        }
+
+        keys = {}
+        for action in action_keys:
+            keys.update({key: action for key in action_keys[action]})
+        # update from configuration file
+        if config.has_section('keys'):
+            for action in config.options('keys'):
+                for key in re.split(',\\s*', config.get('keys', action, '')):
+                    keys[key] = action
+
+        return keys
+
+    def get_palette(self):
+        palette = [
+            # name          fg              bg              style
+            ('normal',      'default',      'default'),
+            ('border',      'light green',  'default'),
+            ('dir',         'light blue',   'default'),
+            ('alert',       'light red',    'default'),
+            ('bright',      'white',        'default'),
+            ('focus',       'black',        'white'),
+            ('focusdir',    'black',        'light blue',   'bold'),
+        ]
+        # update from configuration file
+        for attr in palette:
+            colors = config.get('color', attr[0], ','.join(attr[1:]))
+            if colors:
+                palette[palette.index(attr)] = (attr[0], *re.split(',\\s*', colors))
+        return palette
+
 
 if __name__ == '__main__':
     logging.basicConfig(filename='log',
                         level=(logging.INFO if os.getenv('DEBUG') else logging.INFO))
 
     config = MyConfigParser()
+    keybindings = config.get_keybindings()
+    palette = config.get_palette()
 
     Pass.extract_all()
-    # UI
+
     passui = UI()
 
-    action_keys = {
-        'dir_down': ['l', 'right'],
-        'dir_up': ['h', 'left'],
-        'down': ['j', 'down', 'ctrl n'],
-        'up': ['k', 'up', 'ctrl p'],
-        'down_screen': ['page down', 'ctrl f'],
-        'up_screen': ['page up', 'ctrl b'],
-        'down_half_screen': ['ctrl d'],
-        'up_half_screen': ['ctrl u'],
-        'end': ['G', 'end'],
-        'home': ['g', 'home'],
-        'cancel': ['esc'],
-        'confirm': ['enter'],
-        'search': ['s'],
-        'insert': ['i'],
-        'generate': ['a'],
-        'edit': ['e'],
-        'delete': ['d'],
-        'copy': ['c'],
-        'toggle_preview': ['z'],
-        'quit': ['q']
-    }
-    keys = {}
-    for action in action_keys:
-        keys.update({key: action for key in action_keys[action]})
-    # update from configuration file
-    if config.has_section('keys'):
-        for action in config.options('keys'):
-            for key in re.split(',\\s*', config.get('keys', action, '')):
-                keys[key] = action
-
-    palette = [
-        # name          fg              bg              style
-        ('normal',      'default',      'default'),
-        ('border',      'light green',  'default'),
-        ('dir',         'light blue',   'default'),
-        ('alert',       'light red',    'default'),
-        ('bright',      'white',        'default'),
-        ('focus',       'black',        'white'),
-        ('focusdir',    'black',        'light blue',   'bold'),
-    ]
-    # update from configuration file
-    for attr in palette:
-        colors = config.get('color', attr[0], ','.join(attr[1:]))
-        if colors:
-            palette[palette.index(attr)] = (attr[0], *re.split(',\\s*', colors))
-
-    # main loop
     main = urwid.MainLoop(passui, palette=palette)
     # set no timeout after escape key
     main.screen.set_input_timeouts(complete_wait=0)
