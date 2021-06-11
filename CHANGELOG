@@ -1,3 +1,11 @@
+0.6.1 2021-06-12
+
+Fixed:
+
+- Warn the deletion with full path.
+- Use `y` to copy, which is the actual initially planned key binding.
+
+
 0.6.0 2021-06-07
 
 Added:
