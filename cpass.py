@@ -257,6 +257,9 @@ class UI(urwid.Frame):
             self.unfocus_edit()
         elif action == 'quit' and self._edit_type is None:
             raise urwid.ExitMainLoop
+        elif self._edit_type == "copy":
+            self.unfocus_edit()
+            self.copy_by_key(key)
         elif self._edit_type == "delete":
             self.unfocus_edit()
             self.delete_confirm(key)
@@ -279,6 +282,16 @@ class UI(urwid.Frame):
                 "the whole folder" if self.listbox.focus.isdir else "the file",
                 os.path.join('/', self.listbox.root, self.listbox.focus.node)
             ))
+        elif action == 'copy' and not self.listbox.focus.isdir:
+            path = os.path.join(self.listbox.root, self.listbox.focus.node)
+            res = Pass.show(path)
+            if res.returncode == 0:
+                pw = self.parse_pass(res.stdout.strip('\n'))
+                message = 'Copy first line (y), line (1-{})'.format(min(len(pw), 9))
+                self.focus_edit("copy", "{}: ".format(message))
+                self._parsed_password = pw
+            else:
+                self.message(res.stderr, alert=True)
         elif action == 'toggle_preview':
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
@@ -382,10 +395,24 @@ class UI(urwid.Frame):
         else:
             self.message("Invalid option.", alert=True)
 
+    def parse_pass(self, passwd):
+        return passwd.split('\n')
+
+    def copy_by_key(self, key):
+        pw = self._parsed_password
+        if key in [str(i + 1) for i in range(len(pw))]:
+            res = run(['xclip', '-selection', Pass.X_SELECTION], text=True,
+                      input=pw[int(key) - 1])
+            if res.returncode == 0:
+                self.message("Copied line {}".format(int(key)))
+            else:
+                self.message(res.stderr, alert=True)
+
 
 class Pass:
     FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
     PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
+    X_SELECTION = os.getenv("PASSWORD_STORE_X_SELECTION", "clipboard")
     all_pass = {}
 
     @classmethod
