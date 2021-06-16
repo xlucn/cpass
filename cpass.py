@@ -9,7 +9,7 @@ import logging
 import configparser
 from subprocess import run, PIPE
 
-version = "0.6.1"
+version = "0.7.0"
 
 
 class PassNode(urwid.AttrMap):
