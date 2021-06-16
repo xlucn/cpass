@@ -511,12 +511,12 @@ class MyConfigParser(configparser.RawConfigParser):
             'home': ['g', 'home'],
             'cancel': ['esc'],
             'confirm': ['enter'],
-            'search': ['s'],
+            'search': ['/'],
             'insert': ['i'],
             'generate': ['a'],
             'edit': ['e'],
             'delete': ['d'],
-            'copy': ['c'],
+            'copy': ['y'],
             'toggle_preview': ['z'],
             'quit': ['q']
         }
