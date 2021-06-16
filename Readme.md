@@ -14,10 +14,10 @@
 - Preview the folder and password content in a preview window
 - Colors, key bindings and other customizations through a configuration file
 - Password file operations, e.g., add, generate, edit, remove
+- Copy password in various ways, e.g., first line, all lines, specific field (also customizable)
 
 ## Features to-be:
 
-- Copy password in various ways, e.g., first line, all lines, specific field (also customizable)
 - Search password files
 - Basic pass git operations and status indicator
 - Password file operations, e.g., copy, move, rename (low priority, since can be done with file managers)
@@ -46,11 +46,12 @@ Basic common keybindings just work as you would use in a lot of other programs:
 `h`, `j`, `k`, `l`, `g`, `G`, `ctrl+d`, `ctrl+u`, `ctrl+f`, `ctrl+b`, `ctrl+n`, `ctrl+p`
 
 For `pass` related operations:
-- `i` will add a new password in current directory
-- `a` will generate a new password in current directory
-- `d` will delete current password file or directory after user confirms
+- `i` add a new password in current directory
+- `a` generate a new password in current directory
+- `d` delete current password file or directory after user confirms
 - `e` edit current password
 - `z` toggle preview
+- `y` + `y/a/[0-9]` copy contents in password
 
 To-do ones
 
@@ -59,7 +60,6 @@ To-do ones
 - `r` rename the file
 - `/` will start a search
 - `D`, `Y`, `P` remove, copy and paste item
-- `y` + `y/G/a/[0-9]` copy contents in password
 
 ### Mouse
 
