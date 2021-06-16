@@ -203,7 +203,7 @@ class UI(urwid.Frame):
         self._app_string = 'cPass'
         self._preview_shown = True
         self._edit_type = None
-        self._help_string = ' a:generate e:edit i:insert z:toggle'
+        self._help_string = ' a:generate e:edit i:insert y:copy z:toggle'
 
         # widgets
         self.path_indicator = urwid.Text('', wrap='clip')
@@ -287,8 +287,7 @@ class UI(urwid.Frame):
             res = Pass.show(path)
             if res.returncode == 0:
                 pw = self.parse_pass(res.stdout.strip('\n'))
-                message = 'Copy first line (y), line (1-{})'.format(min(len(pw), 9))
-                self.focus_edit("copy", "{}: ".format(message))
+                self.focus_edit("copy", 'Copy [{}]: '.format(''.join(pw.keys())))
                 self._parsed_password = pw
             else:
                 self.message(res.stderr, alert=True)
@@ -396,17 +395,30 @@ class UI(urwid.Frame):
             self.message("Invalid option.", alert=True)
 
     def parse_pass(self, passwd):
-        return passwd.split('\n')
+        lines = passwd.split('\n')
+        copiable_fields = {str(i + 1): lines[i] for i in range(min(9, len(lines)))}
+        copiable_fields['a'] = passwd
+        copiable_fields['y'] = lines[0]
+
+        for line in lines[1:]:
+            if line.find(':') != -1:
+                field, value = line.split(':')
+                if field in copy_bindings:
+                    copiable_fields[copy_bindings[field]] = value.strip()
+        logging.debug(str(copiable_fields))
+
+        return copiable_fields
 
     def copy_by_key(self, key):
-        pw = self._parsed_password
-        if key in [str(i + 1) for i in range(len(pw))]:
-            res = run(['xclip', '-selection', Pass.X_SELECTION], text=True,
-                      input=pw[int(key) - 1])
+        if key in self._parsed_password:
+            copy_text = self._parsed_password[key]
+            res = run(['xclip', '-selection', Pass.X_SELECTION], text=True, input=copy_text)
             if res.returncode == 0:
-                self.message("Copied line {}".format(int(key)))
+                self.message("Copied.")
             else:
                 self.message(res.stderr, alert=True)
+        else:
+            self.message("Nothing copied", alert=True)
 
 
 class Pass:
@@ -538,6 +550,16 @@ class MyConfigParser(configparser.RawConfigParser):
                 palette[palette.index(attr)] = (attr[0], *re.split(',\\s*', colors))
         return palette
 
+    def get_copybindings(self):
+        """ get field-key pairs """
+        copy_bindings = {'login': 'l'}
+
+        if config.has_section('copy_fields'):
+            for field in config.options('copy_fields'):
+                copy_bindings[field] = config.get('copy_fields', field)
+
+        return copy_bindings
+
 
 if __name__ == '__main__':
     logging.basicConfig(filename='log',
@@ -546,6 +568,7 @@ if __name__ == '__main__':
     config = MyConfigParser()
     keybindings = config.get_keybindings()
     palette = config.get_palette()
+    copy_bindings = config.get_copybindings()
 
     Pass.extract_all()
 
