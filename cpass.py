@@ -562,8 +562,8 @@ class MyConfigParser(configparser.RawConfigParser):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='log',
-                        level=(logging.INFO if os.getenv('DEBUG') else logging.INFO))
+    logging.basicConfig(level=(logging.DEBUG if os.getenv('DEBUG') else logging.DEBUG),
+                        encoding='utf-8', filename='log')
 
     config = MyConfigParser()
     keybindings = config.get_keybindings()
