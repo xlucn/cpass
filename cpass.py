@@ -282,20 +282,8 @@ class UI(urwid.Frame):
                 "the whole folder" if self.listbox.focus.isdir else "the file",
                 os.path.join('/', self.listbox.root, self.listbox.focus.node)
             ))
-        elif action == 'copy' and not self.listbox.focus.isdir:
-            if self._preview_shown:
-                password = self.preview.original_widget.text
-            else:
-                path = os.path.join(self.listbox.root, self.listbox.focus.node)
-                res = Pass.show(path)
-                if res.returncode != 0:
-                    self.message(res.stderr, alert=True)
-                    return
-                password = res.stdout
-
-            pw = self.parse_pass(password.strip('\n'))
-            self.focus_edit("copy", 'Copy [{}]: '.format(''.join(pw.keys())))
-            self._parsed_password = pw
+        elif action == 'copy':
+            self.copy_confirm()
         elif action == 'toggle_preview':
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
@@ -413,6 +401,23 @@ class UI(urwid.Frame):
         logging.debug(str(copiable_fields))
 
         return copiable_fields
+
+    def copy_confirm(self):
+        if self.listbox.focus.isdir:
+            return
+        if self._preview_shown:
+            password = self.preview.original_widget.text
+        else:
+            path = os.path.join(self.listbox.root, self.listbox.focus.node)
+            res = Pass.show(path)
+            if res.returncode != 0:
+                self.message(res.stderr, alert=True)
+                return
+            password = res.stdout
+
+        pw = self.parse_pass(password.strip('\n'))
+        self.focus_edit("copy", 'Copy [{}]: '.format(''.join(pw.keys())))
+        self._parsed_password = pw
 
     def copy_by_key(self, key):
         if key in self._parsed_password:
