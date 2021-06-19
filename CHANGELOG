@@ -1,3 +1,10 @@
+0.8.0 2021-06-19
+
+Changed:
+
+- Renamed the excutable to `cpass`, the extension was removed. This breaks compatibility in a way, but I did not start a new major version, since I have not promoted cpass to anyone yet so the impact is nearly zero. Nobody cares.
+
+
 0.7.0 2021-06-16
 
 Added:
