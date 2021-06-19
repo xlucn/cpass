@@ -96,7 +96,7 @@ class PassList(urwid.ListBox):
             'dir_up':   'up',
         }
 
-        action = keybindings.get(key)
+        action = config.keybindings.get(key)
         if action in list_navigation_offsets:
             self.list_navigate(size, list_navigation_offsets[action])
         elif action in dir_navigation_directions:
@@ -252,7 +252,7 @@ class UI(urwid.Frame):
 
     def keypress(self, size, key):
         logging.debug("ui keypress: {} {}".format(key, size))
-        action = keybindings.get(key)
+        action = config.keybindings.get(key)
         if action == 'cancel':
             self.unfocus_edit()
         elif action == 'quit' and self._edit_type is None:
@@ -396,8 +396,8 @@ class UI(urwid.Frame):
         for line in lines[1:]:
             if line.find(':') != -1:
                 field, value = line.split(':')
-                if field in copy_bindings:
-                    copiable_fields[copy_bindings[field]] = value.strip()
+                if field in config.copy_bindings:
+                    copiable_fields[config.copy_bindings[field]] = value.strip()
         logging.debug(str(copiable_fields))
 
         return copiable_fields
@@ -500,6 +500,10 @@ class MyConfigParser(configparser.RawConfigParser):
         self.icon_file = self.get('icon', 'file', ' ')
         self.no_symbols = self.get('pass', 'no_symbols', 'false', boolean=True)
 
+        self.keybindings = self.get_keybindings()
+        self.palette = self.get_palette()
+        self.copy_bindings = self.get_copybindings()
+
     def get(self, section, option, fallback=None, boolean=False):
         try:
             result = super().get(section, option)
@@ -535,9 +539,9 @@ class MyConfigParser(configparser.RawConfigParser):
         for action in action_keys:
             keys.update({key: action for key in action_keys[action]})
         # update from configuration file
-        if config.has_section('keys'):
-            for action in config.options('keys'):
-                for key in re.split(',\\s*', config.get('keys', action, '')):
+        if self.has_section('keys'):
+            for action in self.options('keys'):
+                for key in re.split(',\\s*', self.get('keys', action, '')):
                     keys[key] = action
 
         return keys
@@ -555,7 +559,7 @@ class MyConfigParser(configparser.RawConfigParser):
         ]
         # update from configuration file
         for attr in palette:
-            colors = config.get('color', attr[0], ','.join(attr[1:]))
+            colors = self.get('color', attr[0], ','.join(attr[1:]))
             if colors:
                 palette[palette.index(attr)] = (attr[0], *re.split(',\\s*', colors))
         return palette
@@ -564,9 +568,9 @@ class MyConfigParser(configparser.RawConfigParser):
         """ get field-key pairs """
         copy_bindings = {'login': 'l'}
 
-        if config.has_section('copy_fields'):
-            for field in config.options('copy_fields'):
-                copy_bindings[field] = config.get('copy_fields', field)
+        if self.has_section('copy_fields'):
+            for field in self.options('copy_fields'):
+                copy_bindings[field] = self.get('copy_fields', field)
 
         return copy_bindings
 
@@ -576,15 +580,10 @@ if __name__ == '__main__':
                         encoding='utf-8', filename='log')
 
     config = MyConfigParser()
-    keybindings = config.get_keybindings()
-    palette = config.get_palette()
-    copy_bindings = config.get_copybindings()
 
     Pass.extract_all()
 
-    passui = UI()
-
-    main = urwid.MainLoop(passui, palette=palette)
+    main = urwid.MainLoop(UI(), palette=config.palette)
     # set no timeout after escape key
     main.screen.set_input_timeouts(complete_wait=0)
     main.run()
