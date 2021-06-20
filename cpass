@@ -435,7 +435,7 @@ class Pass:
     FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
     PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
     X_SELECTION = os.getenv("PASSWORD_STORE_X_SELECTION", "clipboard")
-    all_pass = {}
+    all_pass = dict()
 
     @classmethod
     def extract_all(cls):
