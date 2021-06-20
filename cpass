@@ -6,6 +6,7 @@ import os
 import re
 import urwid
 import logging
+import tempfile
 import configparser
 from subprocess import run, PIPE
 
@@ -579,7 +580,7 @@ class MyConfigParser(configparser.RawConfigParser):
 
 if __name__ == '__main__':
     logging.basicConfig(level=(logging.DEBUG if os.getenv('DEBUG') else logging.DEBUG),
-                        encoding='utf-8', filename='log')
+                        filename=os.path.join(tempfile.gettempdir(), 'cpass.log'))
 
     config = MyConfigParser()
 
