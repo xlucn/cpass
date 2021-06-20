@@ -548,7 +548,7 @@ class MyConfigParser(configparser.RawConfigParser):
 
     def get_palette(self):
         palette = [
-            # name          fg              bg              style
+            # name          fg              bg              mono
             ('normal',      'default',      'default'),
             ('border',      'light green',  'default'),
             ('dir',         'light blue',   'default'),
