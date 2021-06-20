@@ -1,8 +1,18 @@
+0.8.1 2021-06-20
+
+Fixed:
+
+- Save the log file in system temporary folder, normally `/tmp` for Linux.
+  It was saved to the current location where cpass is started.
+
+
 0.8.0 2021-06-19
 
 Changed:
 
-- Renamed the excutable to `cpass`, the extension was removed. This breaks compatibility in a way, but I did not start a new major version, since I have not promoted cpass to anyone yet so the impact is nearly zero. Nobody cares.
+- Renamed the excutable to `cpass`, the extension was removed. This breaks
+  compatibility in a way, but I did not start a new major version, since I have
+  not promoted cpass to anyone yet so the impact is nearly zero. Nobody cares.
 
 
 0.7.0 2021-06-16
