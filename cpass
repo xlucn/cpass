@@ -442,12 +442,9 @@ class Pass:
         # pass files traversal, topdown option is essential, see PassNode
         for root, dirs, files in os.walk(cls.PASS_DIR, topdown=False):
             if not root.startswith(os.path.join(cls.PASS_DIR, '.git')):
-                root = os.path.normpath(os.path.relpath(root, cls.PASS_DIR))
-                dirs = [os.path.join('', d) for d in dirs if d != '.git']
+                root = os.path.normpath(os.path.relpath(root, cls.PASS_DIR)).lstrip('.')
+                dirs = [d for d in dirs if d != '.git']
                 files = [file[:-4] for file in files if file.endswith('.gpg')]
-                # TODO: get rid of this
-                if root == '.':
-                    root = ''
                 # NOTE: all_pass, FolderWalker, PassNode references are in a cycle.
                 cls.all_pass[root] = FolderWalker(root, dirs, files)
 
