@@ -105,8 +105,6 @@ class PassList(urwid.ListBox):
             return super().keypress(size, key)
 
     def dir_navigate(self, direction):
-        logging.debug("body length: {}".format(len(self.body)))
-
         # record current position
         Pass.all_pass[self.root].pos = self.focus_position
 
@@ -196,7 +194,8 @@ class FolderWalker(list):
 
 
 # TODO: update count
-# TODO: background preview
+# TODO: background preview, or/and cache preview results
+# TODO: focus changing when editing
 class UI(urwid.Frame):
     def __init__(self):
         self._last_preview = None
@@ -307,9 +306,10 @@ class UI(urwid.Frame):
 
     def handle_input(self):
         if self._edit_type == "search":
-            # dummy search
+            # TODO: search
             self.unfocus_edit()
         elif self._edit_type == "generate":
+            # TODO: can not accept "dir/node" format
             self.unfocus_edit()
             self.run_pass(Pass.generate, self.listbox.insert,
                           self.editbox.edit_text, self.listbox.root, "Generate: {}")
@@ -398,7 +398,6 @@ class UI(urwid.Frame):
                 field, value = line.split(':')
                 if field in config.copy_bindings:
                     copiable_fields[config.copy_bindings[field]] = value.strip()
-        logging.debug(str(copiable_fields))
 
         return copiable_fields
 
@@ -445,8 +444,10 @@ class Pass:
                 root = os.path.normpath(os.path.relpath(root, cls.PASS_DIR))
                 dirs = [os.path.join('', d) for d in dirs if d != '.git']
                 files = [file[:-4] for file in files if file.endswith('.gpg')]
+                # TODO: get rid of this
                 if root == '.':
                     root = ''
+                # NOTE: all_pass, FolderWalker, PassNode references are in a cycle.
                 cls.all_pass[root] = FolderWalker(root, dirs, files)
 
     @staticmethod
@@ -458,6 +459,7 @@ class Pass:
     @staticmethod
     def edit(node):
         # can not pipe stdout because this will start vim
+        # TODO: work around by manually edit temp file and insert with multiline
         result = run(['pass', 'edit', node], stderr=PIPE, text=True)
         main.screen.clear()
         return result
