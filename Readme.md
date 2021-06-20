@@ -1,6 +1,6 @@
 # cpass: another console UI for pass
 
-**!DISCLAIMER!**: Before the version 1.0.0, I do not guarantee that this program runs as intended overall, so back up your passwords or use git (by `pass git init`) to manage the password store, so that the changes can be reverted.
+**!DISCLAIMER!**: Before the version 1.0.0, I do not guarantee that this program runs as intended overall, so back up your passwords or use git (by `pass git init`) to manage the password store, so that the changes can be reverted. I only use `pass` commands to interact with the password store, so simply do `pass git reset --hard <some commit>` to revert any changes.
 
 `cpass` is an [urwid](http://urwid.org/) based terminal user interface (TUI) for the standard unix password manager, [`pass`](https://www.passwordstore.org/).
 `cpass` tries to achieve a minimal, clean interface and utilizes vim-like keybinding. Also, thanks to the urwid module, mouse is supported quite well.
