@@ -8,7 +8,7 @@ import urwid
 import logging
 import tempfile
 import configparser
-from subprocess import run, PIPE
+from subprocess import run, PIPE, DEVNULL
 
 version = "0.8.1"
 
@@ -422,11 +422,12 @@ class UI(urwid.Frame):
     def copy_by_key(self, key):
         if key in self._parsed_password:
             copy_text = self._parsed_password[key]
-            res = run(['xclip', '-selection', Pass.X_SELECTION], text=True, input=copy_text)
+            res = run(['xclip', '-selection', Pass.X_SELECTION],
+                      text=True, input=copy_text, stderr=DEVNULL, stdout=DEVNULL)
             if res.returncode == 0:
                 self.message("Copied.")
             else:
-                self.message(res.stderr, alert=True)
+                self.message("Copy with xclip failed", alert=True)
         else:
             self.message("Nothing copied", alert=True)
 
