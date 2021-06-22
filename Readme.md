@@ -1,8 +1,11 @@
 # cpass: another console UI for pass
 
-**!DISCLAIMER!**: Before the version 1.0.0, I do not guarantee that this program runs as intended overall, so back up your passwords or use git (by `pass git init`) to manage the password store, so that the changes can be reverted. I only use `pass` commands to interact with the password store, so simply do `pass git reset --hard <some commit>` to revert any changes.
+**!DISCLAIMER!**: Before the version 1.0.0, I do not guarantee that this program will always run as intended.
+So it is recommended to back up your passwords or use git (by `pass git init`) to manage the password store, so that the changes can be reverted.
+On my side, I only use `pass` commands to interact with the password store to minimise any possible damages.
+So simply do `pass git reset --hard <some commit>` to revert any changes.
 
-`cpass` is an [urwid](http://urwid.org/) based terminal user interface (TUI) for the standard unix password manager, [`pass`](https://www.passwordstore.org/).
+`cpass` is an [urwid](http://urwid.org/) based terminal user interface (TUI) for the standard unix password manager, [pass](https://www.passwordstore.org/).
 `cpass` tries to achieve a minimal, clean interface and utilizes vim-like keybinding. Also, thanks to the urwid module, mouse is supported quite well.
 
 ![](https://github.com/OliverLew/oliverlew.github.io/blob/pictures/cpass.png?raw=true)
@@ -26,13 +29,24 @@ Features to-be:
 - [pass](https://www.passwordstore.org/)
 - [urwid](http://urwid.org/)
 
-Make sure you are using a local password store created/compatible with [`pass`](https://www.passwordstore.org/), which `cpass` will look for in `$PASSWORD_STORE_DIR`, otherwise in `~/.password_store/`. `pass` is also required, although theoretically a `pass` compatible client does not need `pass` command (e.g., [qtpass](https://qtpass.org/) can work with `git` and `gpg`). However, `pass` does a lot of things to assure the robustness and security of password management, there is no need to reinvent the wheels.
+Make sure you are using a local password store created/compatible with [`pass`](https://www.passwordstore.org/), which `cpass` will look for in `$PASSWORD_STORE_DIR`, otherwise in `~/.password_store/`.
+`pass` is also required, although theoretically a `pass` compatible client does not need `pass` command (e.g., [qtpass](https://qtpass.org/) can work with `git` and `gpg`).
+However, `pass` does a lot of things to assure the robustness and security of password management, there is no need to reinvent the wheels.
+
+## Install
+
+- As python package:
+  ```
+  pip install --user cpass
+  ```
+
+- Clone the repo or download the single script file.
 
 ## Usage:
 
 ### Start `cpass`
 
-For now, just start the python script.
+For now, just run `cpass`.
 
 ### Keybindings
 
@@ -66,7 +80,8 @@ This is very intuitive.
 
 ## Configuration
 
-Some appearances or behaviors in the program can be customized through a configuration file located at `$XDG_CONFIG_DIR/cpass/cpass.cfg` or `$HOME/.config/cpass/cpass.cfg`. Most importantly, the key bindings and colors can be changed. For more details see the comments in the example `cpass.cfg` provided in the repo.
+Some appearances or behaviors in the program can be customized through a configuration file located at `$XDG_CONFIG_DIR/cpass/cpass.cfg` or `$HOME/.config/cpass/cpass.cfg`.
+Most importantly, the key bindings and colors can be changed. For more details see the comments in the example `cpass.cfg` provided in the repo.
 
 There are different sections in the configuration file for different type of options, as listed below.
 
