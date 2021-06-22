@@ -277,6 +277,7 @@ class UI(urwid.Frame):
         elif action == 'edit' and not self.listbox.focus.isdir:
             self.run_pass(Pass.edit, self.listbox.insert,
                           self.listbox.focus.node, self.listbox.root, "Edit: {}")
+            urwid.emit_signal(self, 'redraw')
         elif action == 'delete':
             self.focus_edit("delete", 'Are you sure to delete {} {}? [Y/n]'.format(
                 "the whole folder" if self.listbox.focus.isdir else "the file",
@@ -459,7 +460,6 @@ class Pass:
         # can not pipe stdout because this will start vim
         # TODO: work around by manually edit temp file and insert with multiline
         result = run(['pass', 'edit', node], stderr=PIPE, text=True)
-        main.screen.clear()
         return result
 
     @staticmethod
@@ -581,7 +581,10 @@ if __name__ == '__main__':
 
     Pass.extract_all()
 
-    main = urwid.MainLoop(UI(), palette=config.palette)
+    passui = UI()
+    main = urwid.MainLoop(passui, palette=config.palette)
     # set no timeout after escape key
     main.screen.set_input_timeouts(complete_wait=0)
+    urwid.register_signal(UI, 'redraw')
+    urwid.connect_signal(passui, 'redraw', main.screen.clear)
     main.run()
