@@ -452,7 +452,6 @@ class Pass:
     @staticmethod
     def show(node):
         result = run(['pass', 'show', node], stdout=PIPE, stderr=PIPE, text=True)
-        main.screen.clear()
         return result
 
     @staticmethod
@@ -468,7 +467,6 @@ class Pass:
         pw = password + '\n' + password + '\n'
         result = run(['pass', 'insert', '-f', node], input=pw,
                      stdout=PIPE, stderr=PIPE, text=True)
-        main.screen.clear()
         return result
 
     @staticmethod
@@ -477,7 +475,6 @@ class Pass:
         if config.no_symbols:
             command.append('-n')
         result = run(command, stdout=PIPE, stderr=PIPE, text=True)
-        main.screen.clear()
         return result
 
     @staticmethod
