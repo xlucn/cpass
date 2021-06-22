@@ -22,10 +22,6 @@ setup(
     scripts=['cpass'],
     python_requires='>=3',
     install_requires=['urwid'],
-    package_dir={"": "."},
-    package_data={
-        'cpass': ['LICENSE'],
-    },
     data_files=[('share/doc/cpass', [
         'cpass.cfg',
         'CHANGELOG',
