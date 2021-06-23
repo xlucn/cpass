@@ -3,11 +3,10 @@ from setuptools import setup
 with open('Readme.md', 'r') as f:
     long_description = f.read()
 
-with open('cpass', 'r') as f:
-    for line in f.readlines():
-        if line.startswith('version'):
-            version = line.split('=')[1].strip(' \"\'\n')
-            break
+for line in open('cpass.py', 'r'):
+    if line.startswith('version'):
+        version = line.split('=')[1].strip(' \"\'\n')
+        break
 
 setup(
     name='cpass',
@@ -19,7 +18,13 @@ setup(
     author='Lu Xu',
     author_email='oliver_lew@outlook.com',
     url='https://github.com/OliverLew/cpass',
-    scripts=['cpass'],
+    # Single-file module and a console script
+    py_modules=['cpass'],
+    entry_points={
+        'console_scripts': [
+            'cpass = cpass:main',
+        ],
+    },
     python_requires='>=3',
     install_requires=['urwid'],
     data_files=[('share/doc/cpass', [
