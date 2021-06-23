@@ -1,3 +1,13 @@
+0.8.2 2021-06-23
+
+`cpass` is uploaded to pypi!
+
+Fixed:
+
+- When copy fails (possibly due to no X11), cpass will crash. Its output also
+  messes the UI. Note after the fix the original error message is also blocked.
+
+
 0.8.1 2021-06-20
 
 Fixed:
