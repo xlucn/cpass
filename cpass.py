@@ -573,18 +573,21 @@ class MyConfigParser(configparser.RawConfigParser):
         return copy_bindings
 
 
-if __name__ == '__main__':
+def main():
     logging.basicConfig(level=(logging.DEBUG if os.getenv('DEBUG') else logging.DEBUG),
                         filename=os.path.join(tempfile.gettempdir(), 'cpass.log'))
 
-    config = MyConfigParser()
-
     Pass.extract_all()
-
     passui = UI()
-    main = urwid.MainLoop(passui, palette=config.palette)
+
+    mainloop = urwid.MainLoop(passui, palette=config.palette)
     # set no timeout after escape key
-    main.screen.set_input_timeouts(complete_wait=0)
+    mainloop.screen.set_input_timeouts(complete_wait=0)
     urwid.register_signal(UI, 'redraw')
-    urwid.connect_signal(passui, 'redraw', main.screen.clear)
-    main.run()
+    urwid.connect_signal(passui, 'redraw', mainloop.screen.clear)
+    mainloop.run()
+
+
+config = MyConfigParser()
+if __name__ == '__main__':
+    main()
