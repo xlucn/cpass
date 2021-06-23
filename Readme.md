@@ -85,51 +85,51 @@ Most importantly, the key bindings and colors can be changed. For more details s
 
 There are different sections in the configuration file for different type of options, as listed below.
 
-`ui`: UI layout.
+- `ui`: UI layout.
 
-- Control the preview window layout, either vertical or horizontal split.
+  Control the preview window layout, either vertical or horizontal split.
   ```
   [ui]
   preview_layout = side/bottom/horizontal/vertical
   ```
 
-`pass`: `pass` related options.
+- `pass`: `pass` related options.
 
-- Whether use `--no-symbols` option in `pass generate`.
+  Whether use `--no-symbols` option in `pass generate`.
   ```
   [pass]
   no_symbols = true/false
   ```
 
-`keys`: Key bindings.
+- `keys`: Key bindings.
 
-- For all actions available, see the example configuration file. For the format to specify keys, see the [urwid documentation](http://urwid.org/manual/userinput.html#keyboard-input)
+  For all actions available, see the example configuration file. For the format to specify keys, see the [urwid documentation](http://urwid.org/manual/userinput.html#keyboard-input)
   ```
   [keys]
   down = j, down, ctrl n
   up = k, up, ctrl p
   ```
 
-`copy-fields`: Copy key bindings.
+- `copy_fields`: Copy key bindings.
 
-- The copy behavior can be customized by specifying a key for any field. So at the copy prompt, pressing that key will copy the corresponding field.
+  The copy behavior can be customized by specifying a key for any field. So at the copy prompt, pressing that key will copy the corresponding field.
   ```
   [copy_fields]
   login = l
   ```
 
-`color`: Colors.
+- `color`: Colors.
 
-- See urwid documentation for [definition](http://urwid.org/reference/display_modules.html#urwid.BaseScreen.register_palette_entry), [an palette example](http://urwid.org/manual/displaymodules.html#setting-a-palette) and [available color names](http://urwid.org/reference/constants.html#foreground-and-background-colors)
+  See urwid documentation for [definition](http://urwid.org/reference/display_modules.html#urwid.BaseScreen.register_palette_entry), [an palette example](http://urwid.org/manual/displaymodules.html#setting-a-palette) and [available color names](http://urwid.org/reference/constants.html#foreground-and-background-colors)
   ```
   [color]
   normal   = default, default
   dir      = light blue, default
   ```
 
-`icon`: Icons for folder and files.
+- `icon`: Icons for folder and files.
 
-- You can specify fancy icons like (below is the Meterial Design Icons I use, they are not default)
+  You can specify fancy icons like (below is the Meterial Design Icons I use, they are not default)
   ```
   [icon]
   dir     = "󰉋 "
