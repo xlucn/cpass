@@ -45,9 +45,11 @@ class PassList(urwid.ListBox):
     def __init__(self, body, root='', ui=None):
         self._ui = ui
         self.root = root
+        self._size = (1, 1)
         super().__init__(body)
 
     def mouse_event(self, size, event, button, col, row, focus):
+        self._size = size
         focus_offset = self.get_focus_offset_inset(size)[0]
 
         logging.debug("passlist mouse event: {} {} {} {} {} {} {} {}".format(
@@ -61,22 +63,23 @@ class PassList(urwid.ListBox):
                 if row == self.focus_position:
                     self.dir_navigate('down')
                 else:
-                    self.list_navigate(size, new_focus=row)
+                    self.list_navigate(new_focus=row)
             else:
                 if row == focus_offset:
                     self.dir_navigate('down')
                 else:
-                    self.list_navigate(size, new_focus=self.focus_position - focus_offset + row)
+                    self.list_navigate(new_focus=self.focus_position - focus_offset + row)
         elif button == 3:
             self.dir_navigate('up')
         elif button == 4:
-            self.list_navigate(size, -1)
+            self.list_navigate(-1)
         elif button == 5:
-            self.list_navigate(size, 1)
+            self.list_navigate(1)
         else:
             return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size, key):
+        self._size = size
         logging.debug("passlist keypress: {} {}".format(key, size))
 
         list_navigation_offsets = {
@@ -99,7 +102,7 @@ class PassList(urwid.ListBox):
 
         action = config.keybindings.get(key)
         if action in list_navigation_offsets:
-            self.list_navigate(size, list_navigation_offsets[action])
+            self.list_navigate(list_navigation_offsets[action])
         elif action in dir_navigation_directions:
             self.dir_navigate(dir_navigation_directions[action])
         else:
@@ -123,8 +126,8 @@ class PassList(urwid.ListBox):
 
         self._ui.update_view()
 
-    def list_navigate(self, size, shift=0, new_focus=None):
-        offset = self.get_focus_offset_inset(size)[0]
+    def list_navigate(self, shift=0, new_focus=None):
+        offset = self.get_focus_offset_inset(self._size)[0]
 
         # either specify a shift offset, or an absolute position
         if new_focus is None:
@@ -135,9 +138,9 @@ class PassList(urwid.ListBox):
 
         # border check
         new_focus = min(max(new_focus, 0), len(self.body) - 1)
-        new_offset = min(max(new_offset, 0), size[1] - 1)
+        new_offset = min(max(new_offset, 0), self._size[1] - 1)
 
-        self.change_focus(size, new_focus, offset_inset=new_offset)
+        self.change_focus(self._size, new_focus, offset_inset=new_offset)
         self._ui.update_preview()
 
     def insert(self, node):
