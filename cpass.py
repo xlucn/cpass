@@ -141,7 +141,7 @@ class PassList(urwid.ListBox):
         new_offset = min(max(new_offset, 0), self._size[1] - 1)
 
         self.change_focus(self._size, new_focus, offset_inset=new_offset)
-        self._ui.update_preview()
+        self._ui.update_view()
 
     def insert(self, node):
         passnode = PassNode(node, self.root)
