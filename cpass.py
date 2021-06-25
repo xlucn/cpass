@@ -206,6 +206,8 @@ class UI(urwid.Frame):
         self._app_string = 'cPass'
         self._preview_shown = True
         self._edit_type = None
+        self._search_pattern = None
+        self._search_direction = 1
         self._help_string = ' a:generate e:edit i:insert y:copy z:toggle'
 
         # widgets
@@ -271,8 +273,13 @@ class UI(urwid.Frame):
         elif self._edit_type is not None:
             # pass through to edit widget (the focused widget)
             return super().keypress(size, key)
-        elif action == 'search':
-            self.focus_edit("search", '/')
+        elif action == 'search' or action == 'search_back':
+            self.focus_edit("search", '/' if action == 'search' else '?')
+            self._search_direction = 1 if action == 'search' else -1
+        elif action == 'search_next':
+            self.search_in_dir(self._search_pattern, 1)
+        elif action == 'search_prev':
+            self.search_in_dir(self._search_pattern, -1)
         elif action == 'insert':
             self.focus_edit("insert", 'Enter password filename: ')
         elif action == 'generate':
@@ -311,8 +318,9 @@ class UI(urwid.Frame):
 
     def handle_input(self):
         if self._edit_type == "search":
-            # TODO: search
+            self._search_pattern = self.editbox.edit_text
             self.unfocus_edit()
+            self.search_in_dir(self._search_pattern, 1)
         elif self._edit_type == "generate":
             # TODO: can not accept "dir/node" format
             self.unfocus_edit()
@@ -435,6 +443,30 @@ class UI(urwid.Frame):
         else:
             self.message("Nothing copied", alert=True)
 
+    def search_in_dir(self, pattern, direction):
+        """ direction = 1 or -1 to specify the search direction """
+        if self._search_pattern is None:
+            self.message("No search pattern", alert=True)
+            return
+
+        # search from the next/previous, wrap if reach bottom/top
+        direction *= self._search_direction
+        start = self.listbox.focus_position
+        length = len(self.listbox.body)
+
+        # The math here is kind of magic. It's the result after simplification
+        if direction > 0:
+            start += 1
+        search_list = list(range(start, length)) + list(range(start))
+
+        for i in search_list[::direction]:
+            node = self.listbox.body[i].node
+            if node.find(pattern) != -1:
+                self.listbox.list_navigate(new_focus=i)
+                return
+
+        self.message("No matching", alert=True)
+
 
 class Pass:
     FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
@@ -527,6 +559,9 @@ class MyConfigParser(configparser.RawConfigParser):
             'cancel': ['esc'],
             'confirm': ['enter'],
             'search': ['/'],
+            'search_back': ['?'],
+            'search_next': ['n'],
+            'search_prev': ['N'],
             'insert': ['i'],
             'generate': ['a'],
             'edit': ['e'],
