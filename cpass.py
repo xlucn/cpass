@@ -277,9 +277,8 @@ class UI(urwid.Frame):
             self.focus_edit("search", '/' if action == 'search' else '?')
             self._search_direction = 1 if action == 'search' else -1
         elif action == 'search_next':
-            self.search_in_dir(self._search_pattern, 1)
-        elif action == 'search_prev':
-            self.search_in_dir(self._search_pattern, -1)
+            self.search_in_dir(self._search_pattern,
+                               1 if action == 'search_next' else -1)
         elif action == 'insert':
             self.focus_edit("insert", 'Enter password filename: ')
         elif action == 'generate':
