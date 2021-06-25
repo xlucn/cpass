@@ -17,10 +17,11 @@ So simply do `pass git reset --hard <some commit>` to revert any changes.
 - Colors, key bindings and other customizations through a configuration file
 - Password file operations, e.g., add, generate, edit, remove
 - Copy password in various ways, e.g., first line, all lines, specific field (also customizable)
+- Search patterns within the current window, the general vim-like operation
 
 Features to-be:
 
-- Search password files
+- Find passwords globally in the password store, the pass find operation
 - Basic pass git operations and status indicator
 - Password file operations, e.g., copy, move, rename (low priority, since can be done with file managers, but it is worth implementing since `pass` commands will create git commits which protect the data)
 
@@ -61,13 +62,14 @@ For `pass` related operations:
 - `e` edit current password
 - `z` toggle preview
 - `y` + `y/a/[0-9]` copy contents in password
+- `/` or `?` will start a search (forward/backward)
+- `n` or `N` go to next or previous search result
 
 To-do ones
 
 - `I` to add multiline password
 - `A` to generate with more options
 - `r` rename the file
-- `/` will start a search
 - `D`, `Y`, `P` remove, copy and paste item
 
 ### Mouse
