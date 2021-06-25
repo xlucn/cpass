@@ -2,7 +2,7 @@
 
 **!DISCLAIMER!**: Before the version 1.0.0, I do not guarantee that this program will always run as intended.
 So it is recommended to back up your passwords or use git (by `pass git init`) to manage the password store, so that the changes can be reverted.
-On my side, I only use `pass` commands to interact with the password store to minimise any possible damages.
+On my side, I only use `pass` commands to interact with the password store to minimize any possible damages.
 So simply do `pass git reset --hard <some commit>` to revert any changes.
 
 `cpass` is an [urwid](http://urwid.org/) based terminal user interface (TUI) for the standard unix password manager, [pass](https://www.passwordstore.org/).
@@ -83,9 +83,9 @@ This is very intuitive.
 ## Configuration
 
 Some appearances or behaviors in the program can be customized through a configuration file located at `$XDG_CONFIG_DIR/cpass/cpass.cfg` or `$HOME/.config/cpass/cpass.cfg`.
-Most importantly, the key bindings and colors can be changed. For more details see the comments in the example `cpass.cfg` provided in the repo.
+Most importantly, the key bindings and colors can be changed.
 
-There is a example configuration file [cpass.cfg](cpass.cfg) with all available options set to the default value. Thus, you don't have to keep the whole file, because it does not change the default behavior of `cpass`. There are different sections in the configuration file for different types of options, as listed below.
+There is an example configuration file [cpass.cfg](cpass.cfg) with all available options set to the default value, with detailed comments. You don't have to copy the whole file, because it does not change the default behavior of `cpass`. The different sections in the configuration file corresponds to different types of options, as listed below.
 
 - `ui`: UI layout.
 
@@ -97,7 +97,7 @@ There is a example configuration file [cpass.cfg](cpass.cfg) with all available 
 
 - `pass`: `pass` related options.
 
-  Whether use `--no-symbols` option in `pass generate`.
+  Whether to use `--no-symbols` option in `pass generate`.
   ```
   [pass]
   no_symbols = true/false
@@ -105,7 +105,7 @@ There is a example configuration file [cpass.cfg](cpass.cfg) with all available 
 
 - `keys`: Key bindings.
 
-  For all actions available, see the example configuration file. For the format to specify keys, see the [urwid documentation](http://urwid.org/manual/userinput.html#keyboard-input)
+  For all actions available, see the example configuration file. For the format to specify keys, see the [urwid documentation](http://urwid.org/manual/userinput.html#keyboard-input).
   ```
   [keys]
   down = j, down, ctrl n
@@ -122,7 +122,7 @@ There is a example configuration file [cpass.cfg](cpass.cfg) with all available 
 
 - `color`: Colors.
 
-  See urwid documentation for [definition](http://urwid.org/reference/display_modules.html#urwid.BaseScreen.register_palette_entry), [an palette example](http://urwid.org/manual/displaymodules.html#setting-a-palette) and [available color names](http://urwid.org/reference/constants.html#foreground-and-background-colors)
+  See urwid documentation for [definition](http://urwid.org/reference/display_modules.html#urwid.BaseScreen.register_palette_entry), [a palette example](http://urwid.org/manual/displaymodules.html#setting-a-palette) and [available color names](http://urwid.org/reference/constants.html#foreground-and-background-colors)
   ```
   [color]
   normal   = default, default
@@ -131,7 +131,7 @@ There is a example configuration file [cpass.cfg](cpass.cfg) with all available 
 
 - `icon`: Icons for folder and files.
 
-  You can specify fancy icons like (below is the Meterial Design Icons I use, they are not default)
+  You can specify fancy icons like (below is the Material Design Icons I use, they are not default)
   ```
   [icon]
   dir     = "󰉋 "
