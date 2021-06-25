@@ -276,7 +276,7 @@ class UI(urwid.Frame):
         elif action == 'search' or action == 'search_back':
             self.focus_edit("search", '/' if action == 'search' else '?')
             self._search_direction = 1 if action == 'search' else -1
-        elif action == 'search_next':
+        elif action == 'search_next' or action == 'search_prev':
             self.search_in_dir(self._search_pattern,
                                1 if action == 'search_next' else -1)
         elif action == 'insert':
