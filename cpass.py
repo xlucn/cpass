@@ -208,7 +208,7 @@ class UI(urwid.Frame):
         self._edit_type = None
         self._search_pattern = None
         self._search_direction = 1
-        self._help_string = ' a:generate e:edit i:insert y:copy z:toggle'
+        self._help_string = ' a:generate e:edit i:insert y:copy z:toggle /:search'
 
         # widgets
         self.path_indicator = urwid.Text('', wrap='clip')
