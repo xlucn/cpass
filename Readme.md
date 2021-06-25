@@ -8,7 +8,7 @@ So simply do `pass git reset --hard <some commit>` to revert any changes.
 `cpass` is an [urwid](http://urwid.org/) based terminal user interface (TUI) for the standard unix password manager, [pass](https://www.passwordstore.org/).
 `cpass` tries to achieve a minimal, clean interface and utilizes vim-like keybinding. Also, thanks to the urwid module, mouse is supported quite well.
 
-![](https://github.com/OliverLew/oliverlew.github.io/blob/pictures/cpass.png?raw=true)
+https://user-images.githubusercontent.com/12032219/123406878-f338b280-d5dd-11eb-951e-2a4fc185a65d.mp4
 
 ## Features:
 
