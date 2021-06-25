@@ -85,7 +85,7 @@ This is very intuitive.
 Some appearances or behaviors in the program can be customized through a configuration file located at `$XDG_CONFIG_DIR/cpass/cpass.cfg` or `$HOME/.config/cpass/cpass.cfg`.
 Most importantly, the key bindings and colors can be changed. For more details see the comments in the example `cpass.cfg` provided in the repo.
 
-There are different sections in the configuration file for different type of options, as listed below.
+There is a example configuration file [cpass.cfg](cpass.cfg) with all available options set to the default value. Thus, you don't have to keep the whole file, because it does not change the default behavior of `cpass`. There are different sections in the configuration file for different types of options, as listed below.
 
 - `ui`: UI layout.
 
