@@ -363,9 +363,9 @@ class UI(urwid.Frame):
         node = self.listbox.focus.text
         path = os.path.join(self.listbox.root, node)
 
-        if not force and path == self._last_preview:
+        if not force and self.listbox.focus == self._last_preview:
             return
-        self._last_preview = path
+        self._last_preview = self.listbox.focus
 
         if self.listbox.focus.isdir:
             preview = "\n".join([(f.icon + f.text) for f in Pass.all_pass[path]])
@@ -486,6 +486,7 @@ class Pass:
 
     @staticmethod
     def show(node):
+        logging.debug("Showing password for {}".format(node))
         result = run(['pass', 'show', node], stdout=PIPE, stderr=PIPE, text=True)
         return result
 
