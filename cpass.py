@@ -209,9 +209,8 @@ class FolderWalker(list):
         return self.index(node)
 
 
-# TODO: update count
 # TODO: background preview, or/and cache preview results
-# TODO: focus changing when editing
+# TODO: deal with focus changing when editing
 class UI(urwid.Frame):
     def __init__(self):
         self._last_preview = None
@@ -333,7 +332,7 @@ class UI(urwid.Frame):
             self.unfocus_edit()
             self.search_in_dir(self._search_pattern, 1)
         elif self._edit_type == "generate":
-            # TODO: can not accept "dir/node" format
+            # TODO: does not show correctly for "dir/node" format
             self.unfocus_edit()
             self.run_pass(Pass.generate, self.listbox.insert,
                           self.editbox.edit_text, self.listbox.root, "Generate: {}")
