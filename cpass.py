@@ -486,6 +486,7 @@ class Pass:
     FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
     PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
     X_SELECTION = os.getenv("PASSWORD_STORE_X_SELECTION", "clipboard")
+    EDITOR = os.getenv("EDITOR", "vi")
     all_pass = dict()
 
     @classmethod
@@ -505,12 +506,24 @@ class Pass:
         result = run(['pass', 'show', path], stdout=PIPE, stderr=PIPE, text=True)
         return result
 
-    @staticmethod
-    def edit(path):
-        # can not pipe stdout because this will start vim
-        # TODO: work around by manually edit temp file and insert with multiline
-        result = run(['pass', 'edit', path], stderr=PIPE, text=True)
-        return result
+    @classmethod
+    def edit(cls, path):
+        # work around terminal output by manually edit temp file and insert with multiline
+        with tempfile.NamedTemporaryFile() as fp:
+            res = cls.show(path)
+            if res.returncode != 0:
+                return res
+            fp.write(res.stdout.encode())
+            fp.flush()
+            # can not pipe stdout because editor won't show otherwise
+            res = run([cls.EDITOR, fp.name], stderr=PIPE)
+            if res.returncode != 0:
+                return res
+            fp.seek(0)
+            password = fp.read()
+            res = run(['pass', 'insert', '-m', '-f', path], input=password,
+                      stderr=PIPE, stdout=PIPE)
+            return res
 
     @staticmethod
     def insert(path, password):
