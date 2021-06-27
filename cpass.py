@@ -23,18 +23,24 @@ class PassNode(urwid.AttrMap):
         self.text = node if node else "-- EMPTY --"
         self.path = os.path.join(root, node) if node else ''
         self.icon = config.icon_dir if isdir else config.icon_file if node else ''
-        # topdown option in os.walk makes this possible,
-        # so that children folders are traversed before its parent
-        self.count = str(len(Pass.all_pass[self.path])) if isdir else ''
 
         super().__init__(urwid.Columns([
                 ('pack', urwid.Text(self.icon)),
                 urwid.Text(self.text, wrap='clip'),
-                ('pack', urwid.Text(self.count))
+                ('pack', urwid.Text(''))
             ]),
             'dir' if isdir else '' if node else 'bright',
             'focusdir' if isdir else 'focus' if node else 'bright',
         )
+
+        self.update_count()
+
+    def update_count(self):
+        # topdown option in os.walk makes this possible,
+        # so that children folders are traversed before its parent
+        if self.isdir:
+            count = len(Pass.all_pass[self.path])
+            self.original_widget.contents[2][0].set_text(str(count))
 
     def keypress(self, size, key):
         """ let the widget pass through the keys to parent widget """
@@ -171,6 +177,12 @@ class PassList(urwid.ListBox):
         self.body[:] = root_list
 
         self._ui.update_view()
+
+    def update_root_count(self):
+        for n in Pass.all_pass[os.path.dirname(self.root)]:
+            if n.node == self.root and n.isdir:
+                n.update_count()
+                return
 
 
 class FolderWalker(list):
@@ -325,6 +337,7 @@ class UI(urwid.Frame):
             self.unfocus_edit()
             self.run_pass(Pass.generate, self.listbox.insert,
                           self.editbox.edit_text, self.listbox.root, "Generate: {}")
+            self.listbox.update_root_count()
         elif self._edit_type == "insert":
             self._insert_node = self.editbox.edit_text
             self.focus_edit("insert_password", 'Enter password: ', '*')
@@ -338,6 +351,7 @@ class UI(urwid.Frame):
                 self.run_pass(Pass.insert, self.listbox.insert,
                               self._insert_node, self.listbox.root, "Insert: {}",
                               args=(self._insert_pass,))
+                self.listbox.update_root_count()
             else:
                 self.message("Password is not the same", alert=True)
 
@@ -394,6 +408,7 @@ class UI(urwid.Frame):
             self.run_pass(Pass.delete, self.listbox.delete,
                           self.listbox.focus.node, self.listbox.root,
                           "Deleting {}", largs=(self.listbox.focus_position,))
+            self.listbox.update_root_count()
         elif key in ['n', 'N']:
             self.message("Abort.")
         else:
