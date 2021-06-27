@@ -485,36 +485,36 @@ class Pass:
                 cls.all_pass[root] = FolderWalker(root, dirs, files)
 
     @staticmethod
-    def show(node):
-        logging.debug("Showing password for {}".format(node))
-        result = run(['pass', 'show', node], stdout=PIPE, stderr=PIPE, text=True)
+    def show(path):
+        logging.debug("Showing password for {}".format(path))
+        result = run(['pass', 'show', path], stdout=PIPE, stderr=PIPE, text=True)
         return result
 
     @staticmethod
-    def edit(node):
+    def edit(path):
         # can not pipe stdout because this will start vim
         # TODO: work around by manually edit temp file and insert with multiline
-        result = run(['pass', 'edit', node], stderr=PIPE, text=True)
+        result = run(['pass', 'edit', path], stderr=PIPE, text=True)
         return result
 
     @staticmethod
-    def insert(node, password):
+    def insert(path, password):
         pw = password + '\n' + password + '\n'
-        result = run(['pass', 'insert', '-f', node], input=pw,
+        result = run(['pass', 'insert', '-f', path], input=pw,
                      stdout=PIPE, stderr=PIPE, text=True)
         return result
 
     @staticmethod
-    def generate(node):
-        command = ['pass', 'generate', '-f', node]
+    def generate(path):
+        command = ['pass', 'generate', '-f', path]
         if config.no_symbols:
             command.append('-n')
         result = run(command, stdout=PIPE, stderr=PIPE, text=True)
         return result
 
     @staticmethod
-    def delete(node):
-        command = ['pass', 'rm', '-r', '-f', node]
+    def delete(path):
+        command = ['pass', 'rm', '-r', '-f', path]
         result = run(command, stdout=PIPE, stderr=PIPE, text=True)
         return result
 
