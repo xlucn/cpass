@@ -150,10 +150,20 @@ class PassList(urwid.ListBox):
         self._ui.update_view()
 
     def insert(self, node):
-        passnode = PassNode(node, self.root)
+        def insert_relative(r, n):
+            n1, sep, n2 = n.partition(os.sep)
+            if sep == os.sep:
+                insert_relative(os.path.join(r, n1), n2)
+            passnode = PassNode(n1, r, isdir=(sep == os.sep))
+            # change stored list
+            if Pass.all_pass.get(r) is None:
+                Pass.all_pass[r] = FolderWalker(r)
+            pos = Pass.all_pass[r].insert_sorted(passnode)
+            # change saved cursor position
+            Pass.all_pass[r].pos = pos
+            return pos
 
-        # change stored list
-        inserted_pos = Pass.all_pass[self.root].insert_sorted(passnode)
+        inserted_pos = insert_relative(self.root, node)
         # change listwalker
         self.body[:] = Pass.all_pass[self.root]
         # focus the new node
@@ -177,7 +187,7 @@ class PassList(urwid.ListBox):
 
 
 class FolderWalker(list):
-    def __init__(self, root, dirs, files):
+    def __init__(self, root, dirs=[], files=[]):
         self.pos = 0  # cursor position
 
         self[:] = [PassNode(f, root, True) for f in sorted(dirs)] + \
@@ -330,7 +340,6 @@ class UI(urwid.Frame):
             self.unfocus_edit()
             self.search_in_dir(self._search_pattern, 1)
         elif self._edit_type == "generate":
-            # TODO: does not show correctly for "dir/node" format
             self.unfocus_edit()
             self.run_pass(Pass.generate, self.listbox.insert,
                           self.editbox.edit_text, self.listbox.root, "Generate: {}")
