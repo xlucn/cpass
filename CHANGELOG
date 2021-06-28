@@ -1,4 +1,19 @@
-0.9.0
+0.9.1 2021-06-28
+
+Bugs fix release.
+
+Fixed:
+
+- Preview not updating due to name duplicates, e.g., when switching between a
+  folder item and a file item with the same name.
+- Folder's count not updating after the item within are added/removed.
+- Git commit messages flashing by after editing password. Now it has been
+  worked around.
+- When creating multi-level filename, e.g. "foo/bar", instead of using that
+  whole name as a single file, now shows directory hierarchy correctly.
+- Fix new item not showing if a dir with the same name exists.
+
+0.9.0 2021-06-25
 
 Added:
 
