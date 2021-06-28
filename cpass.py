@@ -153,14 +153,9 @@ class PassList(urwid.ListBox):
         passnode = PassNode(node, self.root)
 
         # change stored list
-        root_list = Pass.all_pass[self.root]
-        if len(root_list) == 1 and root_list[0].node is None:
-            root_list.pop()
-        inserted_pos = root_list.insert_sorted(passnode)
-
+        inserted_pos = Pass.all_pass[self.root].insert_sorted(passnode)
         # change listwalker
-        self.body[:] = root_list
-
+        self.body[:] = Pass.all_pass[self.root]
         # focus the new node
         self.set_focus(inserted_pos)
 
@@ -168,13 +163,9 @@ class PassList(urwid.ListBox):
 
     def delete(self, pos):
         # change stored list
-        root_list = Pass.all_pass[self.root]
-        root_list.pop(pos)
-        if len(root_list) == 0:
-            root_list.append(PassNode(None, None))
-
+        Pass.all_pass[self.root].pop(pos)
         # change listwalker
-        self.body[:] = root_list
+        self.body[:] = Pass.all_pass[self.root]
 
         self._ui.update_view()
 
@@ -196,12 +187,19 @@ class FolderWalker(list):
         if len(self) == 0:
             self[:] = [PassNode(None, None)]
 
+    def pop(self, index=-1):
+        super().pop(index)
+        if len(self) == 0:
+            super().append(PassNode(None, None))
+
     def insert_sorted(self, node):
         # if node already exist, return the index
         node_list = [n.node for n in self]
         if node.node in node_list:
             return node_list.index(node.node)
 
+        if len(self) == 1 and self[0].node is None:
+            super().pop()
         # insert and sort, with directories sorted before files
         super().insert(self.pos, node)
         self[:] = sorted([n for n in self if n.isdir], key=lambda n: n.node) + \
