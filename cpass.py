@@ -204,12 +204,14 @@ class FolderWalker(list):
 
     def insert_sorted(self, node):
         # if node already exist, return the index
-        node_list = [n.node for n in self]
-        if node.node in node_list:
-            return node_list.index(node.node)
+        for n in self:
+            if n.node == node.node and n.isdir == node.isdir:
+                return self.index(n)
 
+        # pop the empty placeholder node beforehand
         if len(self) == 1 and self[0].node is None:
             super().pop()
+
         # insert and sort, with directories sorted before files
         super().insert(self.pos, node)
         self[:] = sorted([n for n in self if n.isdir], key=lambda n: n.node) + \
