@@ -1,8 +1,12 @@
 unreleased
 
+Changed:
+
+- The search is now smartcase like in vim.
+
 Fixed:
 
-- Check if pass directory exists
+- Check if pass directory exists.
 
 
 0.9.1 2021-06-28
