@@ -496,6 +496,8 @@ class Pass:
     X_SELECTION = os.getenv("PASSWORD_STORE_X_SELECTION", "clipboard")
     EDITOR = os.getenv("EDITOR", "vi")
     all_pass = dict()
+    # exit if pass dir does not exit
+    assert(os.path.exists(PASS_DIR))
 
     @classmethod
     def extract_all(cls):
