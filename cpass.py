@@ -467,7 +467,7 @@ class UI(urwid.Frame):
 
     def search_in_dir(self, pattern, direction):
         """ direction = 1 or -1 to specify the search direction """
-        if self._search_pattern is None:
+        if pattern is None:
             self.message("No search pattern", alert=True)
             return
 
