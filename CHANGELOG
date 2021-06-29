@@ -1,9 +1,13 @@
 unreleased
 
+Small changes are introduced regarding search and sort.
+
 Changed:
 
 - The search is now smartcase like in vim.
 - The list is sorted case-insensitively.
+- Searching is now considering the pattern to be space separated keywords. The
+  search result requires all keywords are in the password name, natually.
 
 Fixed:
 

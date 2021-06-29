@@ -484,7 +484,7 @@ class UI(urwid.Frame):
         icase = pattern == pattern.lower()
         for i in search_list[::direction]:
             node = self.listbox.body[i].node
-            if pattern in (node.lower() if icase else node):
+            if all([s in (node.lower() if icase else node) for s in pattern.split()]):
                 self.listbox.list_navigate(new_focus=i)
                 return
 
