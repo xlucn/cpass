@@ -3,6 +3,7 @@ unreleased
 Changed:
 
 - The search is now smartcase like in vim.
+- The list is sorted case-insensitively.
 
 Fixed:
 

@@ -190,8 +190,8 @@ class FolderWalker(list):
     def __init__(self, root, dirs=[], files=[]):
         self.pos = 0  # cursor position
 
-        self[:] = [PassNode(f, root, True) for f in sorted(dirs)] + \
-            [PassNode(f, root) for f in sorted(files)]
+        self[:] = [PassNode(f, root, True) for f in sorted(dirs, key=str.lower)] + \
+                  [PassNode(f, root) for f in sorted(files, key=str.lower)]
 
         # prevent empty list, which troubles listbox operations
         if len(self) == 0:
@@ -214,8 +214,8 @@ class FolderWalker(list):
 
         # insert and sort, with directories sorted before files
         super().insert(self.pos, node)
-        self[:] = sorted([n for n in self if n.isdir], key=lambda n: n.node) + \
-            sorted([n for n in self if not n.isdir], key=lambda n: n.node)
+        self[:] = sorted([n for n in self if n.isdir], key=lambda n: n.node.lower()) + \
+            sorted([n for n in self if not n.isdir], key=lambda n: n.node.lower())
         return self.index(node)
 
 
