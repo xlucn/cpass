@@ -308,7 +308,7 @@ class UI(urwid.Frame):
         elif action == 'generate':
             self.focus_edit("generate", 'Generate a password file: ')
         elif action == 'edit' and not self.listbox.focus.isdir:
-            self.run_pass(Pass.edit, self.listbox.insert,
+            self.run_pass(Pass.edit, None,
                           self.listbox.focus.node, self.listbox.root, "Edit: {}")
             urwid.emit_signal(self, 'redraw')
         elif action == 'delete':
