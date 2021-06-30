@@ -12,6 +12,7 @@ Changed:
 Fixed:
 
 - Check if pass directory exists.
+- Colors of focused items in light color schemes now have correct reverse effects.
 
 
 0.9.1 2021-06-28

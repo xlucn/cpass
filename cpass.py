@@ -629,7 +629,7 @@ class MyConfigParser(configparser.RawConfigParser):
             ('dir',         'light blue',   'default'),
             ('alert',       'light red',    'default'),
             ('bright',      'white',        'default'),
-            ('focus',       'black',        'white'),
+            ('focus',       'standout',     'default'),
             ('focusdir',    'black',        'light blue',   'bold'),
         ]
         # update from configuration file
