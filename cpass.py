@@ -442,18 +442,16 @@ class UI(urwid.Frame):
             self.message("Invalid option.", alert=True)
 
     def parse_pass(self, passwd):
-        # TODO: copy value even if specifing numbers
         # TODO: mark numbers on the side
         lines = passwd.split('\n')
-        copiable_fields = {str(i + 1): lines[i] for i in range(min(9, len(lines)))}
-        copiable_fields['a'] = passwd
-        copiable_fields['y'] = lines[0]
+        copiable_fields = {'a': passwd, 'y': lines[0], '1': lines[0]}
 
-        for line in lines[1:]:
-            if line.find(':') != -1:
-                field, value = line.split(':')
-                if field in config.copy_bindings:
-                    copiable_fields[config.copy_bindings[field]] = value.strip()
+        for i in range(1, len(lines)):
+            field, sep, value = [s.strip() for s in lines[i].partition(':')]
+            if i < 10:
+                copiable_fields[str(i + 1)] = value if sep == ':' else field
+            if sep == ':' and field in config.copy_bindings:
+                copiable_fields[config.copy_bindings[field]] = value
 
         return copiable_fields
 
@@ -471,7 +469,7 @@ class UI(urwid.Frame):
             password = res.stdout
 
         pw = self.parse_pass(password.strip('\n'))
-        self.focus_edit("copy", 'Copy [{}]: '.format(''.join(pw.keys())))
+        self.focus_edit("copy", 'Copy [{}]: '.format(''.join(sorted(pw))))
         self._parsed_password = pw
 
     def copy_by_key(self, key):

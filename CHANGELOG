@@ -8,6 +8,7 @@ Changed:
 - The list is sorted case-insensitively.
 - Searching is now considering the pattern to be space separated keywords. The
   search result requires all keywords are in the password name, naturally.
+- Copy will copy only the right hand side of colon ":" if exists.
 
 Fixed:
 
