@@ -151,6 +151,11 @@ class PassList(urwid.ListBox):
 
     def insert(self, node):
         def insert_relative(r, n):
+            # if starts with /, then assume the node is relative to store root
+            if n.startswith('/'):
+                n = n.lstrip('/')
+                r = ''
+
             n1, sep, n2 = n.partition(os.sep)
             if sep == os.sep:
                 insert_relative(os.path.join(r, n1), n2)
