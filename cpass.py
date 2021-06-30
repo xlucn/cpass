@@ -156,14 +156,18 @@ class PassList(urwid.ListBox):
                 n = n.lstrip('/')
                 r = ''
 
-            n1, sep, n2 = n.partition(os.sep)
-            if sep == os.sep:
+            # separate at the first /
+            n1, sep, n2 = n.partition('/')
+            # recursively insert if there are more levels
+            if sep == '/':
                 insert_relative(os.path.join(r, n1), n2)
-            passnode = PassNode(n1, r, isdir=(sep == os.sep))
+
             # change stored list
+            passnode = PassNode(n1, r, sep == '/')
             if Pass.all_pass.get(r) is None:
                 Pass.all_pass[r] = FolderWalker(r)
             pos = Pass.all_pass[r].insert_sorted(passnode)
+
             # change saved cursor position
             Pass.all_pass[r].pos = pos
 
@@ -174,7 +178,7 @@ class PassList(urwid.ListBox):
         # change listwalker
         self.body[:] = Pass.all_pass[self.root]
         # focus the new node
-        self.set_focus(inserted_pos)
+        self.list_navigate(new_focus=inserted_pos)
 
         self._ui.update_view()
 
