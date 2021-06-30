@@ -17,7 +17,7 @@ https://user-images.githubusercontent.com/12032219/123406878-f338b280-d5dd-11eb-
 - Colors, key bindings and other customizations through a configuration file
 - Password file operations, e.g., add, generate, edit, remove
 - Copy password in various ways, e.g., first line, all lines, specific field (also customizable)
-- Search patterns within the current window, the general vim-like operation. The searching is smart in case sensitivity, i.e., ignore case when the search pattern contains upper case characters.
+- Search keywords within the current window, the general vim-like operation. The searching is smart in case sensitivity, i.e., ignore case when the search keywords contains upper case characters.
 
 Features to-be:
 
