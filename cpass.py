@@ -166,7 +166,9 @@ class PassList(urwid.ListBox):
             pos = Pass.all_pass[r].insert_sorted(passnode)
             # change saved cursor position
             Pass.all_pass[r].pos = pos
-            return pos
+
+            # do not change cursor position if the path is not relative
+            return pos if r == self.root else None
 
         inserted_pos = insert_relative(self.root, node)
         # change listwalker
