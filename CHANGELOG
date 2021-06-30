@@ -7,13 +7,13 @@ Changed:
 - The search is now smartcase like in vim.
 - The list is sorted case-insensitively.
 - Searching is now considering the pattern to be space separated keywords. The
-  search result requires all keywords are in the password name, natually.
+  search result requires all keywords are in the password name, naturally.
 
 Fixed:
 
 - Check if pass directory exists.
 - Colors of focused items in light color schemes now have correct reverse effects.
-
+- Do not move cursor after if the new item path is absolute.
 
 0.9.1 2021-06-28
 
@@ -67,7 +67,7 @@ Fixed:
 
 Changed:
 
-- Renamed the excutable to `cpass`, the extension was removed. This breaks
+- Renamed the executable to `cpass`, the extension was removed. This breaks
   compatibility in a way, but I did not start a new major version, since I have
   not promoted cpass to anyone yet so the impact is nearly zero. Nobody cares.
 
