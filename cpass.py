@@ -221,6 +221,9 @@ class FolderWalker(list):
 
 # TODO: background preview, or/and cache preview results
 # TODO: deal with focus changing when editing
+# TODO: CLI arguments
+# TODO: git support
+# TODO: otp support
 class UI(urwid.Frame):
     def __init__(self):
         self._last_preview = None
@@ -423,6 +426,8 @@ class UI(urwid.Frame):
             self.message("Invalid option.", alert=True)
 
     def parse_pass(self, passwd):
+        # TODO: copy value even if specifing numbers
+        # TODO: mark numbers on the side
         lines = passwd.split('\n')
         copiable_fields = {str(i + 1): lines[i] for i in range(min(9, len(lines)))}
         copiable_fields['a'] = passwd
