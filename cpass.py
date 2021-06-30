@@ -402,6 +402,11 @@ class UI(urwid.Frame):
         self.preview.original_widget.set_text(preview)
 
     def run_pass(self, func, lfunc, node, root, msg, args=(), largs=()):
+        # do not accept password name ends with /, pass itself has problems
+        if node.endswith('/'):
+            self.message(f'Can not create a directory: {node}.', alert=True)
+            return
+
         path = os.path.join(root, node)
         res = func(path, *args)
         if res.returncode == 0:
