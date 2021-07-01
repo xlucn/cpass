@@ -19,16 +19,20 @@ https://user-images.githubusercontent.com/12032219/123406878-f338b280-d5dd-11eb-
 - Copy password in various ways, e.g., first line, all lines, specific field (also customizable)
 - Search keywords within the current window, the general vim-like operation. The searching is smart in case sensitivity, i.e., ignore case when the search keywords contains upper case characters.
 
-Features to-be:
+Features todo list:
 
 - Find passwords globally in the password store, the pass find operation
 - Basic pass git operations and status indicator
 - Password file operations, e.g., copy, move, rename (low priority, since can be done with file managers, but it is worth implementing since `pass` commands will create git commits which protect the data)
+- QR code, maybe?
+- Asynchronous preview, or/and cache preview results
+- OTP support
 
 ## Requirement
 
 - [pass](https://www.passwordstore.org/)
-- [urwid](http://urwid.org/)
+- [urwid](http://urwid.org/) module
+- `xclip` for copy passwords
 
 Make sure you are using a local password store created/compatible with [`pass`](https://www.passwordstore.org/), which `cpass` will look for in `$PASSWORD_STORE_DIR`, otherwise in `~/.password_store/`.
 `pass` is also required, although theoretically a `pass` compatible client does not need `pass` command (e.g., [qtpass](https://qtpass.org/) can work with `git` and `gpg`).
@@ -65,7 +69,7 @@ For `pass` related operations:
 - `/` or `?` will start a search (forward/backward)
 - `n` or `N` go to next or previous search result
 
-To-do ones
+To-do ones (might change)
 
 - `I` to add multiline password
 - `A` to generate with more options
