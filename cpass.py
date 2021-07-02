@@ -343,7 +343,7 @@ class UI(urwid.Frame):
         self.messagebox.set_text('')
         self.editbox.set_mask(None)
 
-    def focus_edit(self, edit_type, cap='', mask=None):
+    def focus_edit(self, edit_type, cap, mask=None):
         self._edit_type = edit_type
         self.contents['footer'] = (self.editbox, None)
         self.set_focus('footer')
@@ -363,10 +363,10 @@ class UI(urwid.Frame):
             self.listbox.update_root_count()
         elif self._edit_type == "insert":
             self._insert_node = self.editbox.edit_text
-            self.focus_edit("insert_password", 'Enter password: ', '*')
+            self.focus_edit("insert_password", 'Enter password: ', mask='*')
         elif self._edit_type == "insert_password":
             self._insert_pass = self.editbox.edit_text
-            self.focus_edit("insert_password_confirm", 'Enter password again: ', '*')
+            self.focus_edit("insert_password_confirm", 'Enter password again: ', mask='*')
         elif self._edit_type == "insert_password_confirm":
             self.unfocus_edit()
             self._insert_pass_again = self.editbox.edit_text
