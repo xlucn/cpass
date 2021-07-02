@@ -15,6 +15,7 @@ Fixed:
 - Check if pass directory exists.
 - Colors of focused items in light color schemes now have correct reverse effects.
 - Do not move cursor after if the new item path is absolute.
+- Prevent focus change when in editbox.
 
 0.9.1 2021-06-28
 

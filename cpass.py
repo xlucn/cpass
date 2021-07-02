@@ -231,7 +231,6 @@ class FolderWalker(list):
 
 
 # TODO: background preview, or/and cache preview results
-# TODO: deal with focus changing when editing
 # TODO: CLI arguments
 # TODO: git support
 # TODO: otp support
@@ -289,6 +288,13 @@ class UI(urwid.Frame):
         else:
             self.middle.contents = [(self.listbox, ('weight', 1, False))]
         self.middle.focus_position = 0
+
+    def mouse_event(self, size, event, button, col, row, focus):
+        logging.debug(f"ui mouse event: {size} {event} {button} {col} {row} {focus}")
+        # Prevent focus change due to clicking when editing
+        r = self.contents['footer'][0].rows(size[:1], True)
+        if self._edit_type is None or self._edit_type and row >= size[1] - r:
+            super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size, key):
         logging.debug("ui keypress: {} {}".format(key, size))
