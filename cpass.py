@@ -295,19 +295,20 @@ class UI(urwid.Frame):
         action = config.keybindings.get(key)
         if action == 'cancel':
             self.unfocus_edit()
-        elif action == 'quit' and self._edit_type is None:
-            raise urwid.ExitMainLoop
         elif self._edit_type == "copy":
             self.unfocus_edit()
             self.copy_by_key(key)
         elif self._edit_type == "delete":
             self.unfocus_edit()
             self.delete_confirm(key)
-        elif action == 'confirm' and self._edit_type is not None:
-            self.handle_input()
         elif self._edit_type is not None:
-            # pass through to edit widget (the focused widget)
-            return super().keypress(size, key)
+            if action == 'confirm':
+                self.handle_input()
+            else:
+                # pass through to edit widget (the focused widget)
+                return super().keypress(size, key)
+        elif action == 'quit':
+            raise urwid.ExitMainLoop
         elif action == 'search' or action == 'search_back':
             self.focus_edit("search", '/' if action == 'search' else '?')
             self._search_direction = 1 if action == 'search' else -1
