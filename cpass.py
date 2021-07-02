@@ -10,7 +10,7 @@ import tempfile
 import configparser
 from subprocess import run, PIPE, DEVNULL
 
-version = "0.9.1"
+version = "0.9.2"
 
 
 class PassNode(urwid.AttrMap):
