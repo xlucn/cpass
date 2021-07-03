@@ -475,7 +475,7 @@ class UI(urwid.Frame):
                 return
             password = res.stdout
 
-        pw = self.parse_pass(password.strip('\n'))
+        pw = self.parse_pass(password.rstrip('\n'))
         self.focus_edit("copy", 'Copy [{}]: '.format(''.join(sorted(pw))))
         self._parsed_password = pw
 
