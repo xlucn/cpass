@@ -91,19 +91,20 @@ class PassList(urwid.ListBox):
         list_navigation_offsets = {
             'down': 1,
             'up': -1,
+            # overshoot to go to bottom/top
             'end': len(self.body),
             'home': -len(self.body),
             'down_screen': size[1],
             'up_screen': -size[1],
             'down_half_screen': size[1] // 2,
             'up_half_screen': -size[1] // 2,
-            # overshoot to go to bottom/top
         }
 
         dir_navigation_directions = {
-            'confirm': 'down',  # the confirm key doubles as enter folder key
+            # the confirm key doubles as enter folder key
+            'confirm': 'down',
             'dir_down': 'down',
-            'dir_up':   'up',
+            'dir_up': 'up',
         }
 
         action = config.keybindings.get(key)
@@ -136,15 +137,15 @@ class PassList(urwid.ListBox):
         offset = self.get_focus_offset_inset(self._size)[0]
 
         # either specify a shift offset, or an absolute position
-        if new_focus is None:
-            new_focus = self.focus_position + shift
-        else:
+        if new_focus:
             shift = new_focus - self.focus_position
+        else:
+            new_focus = shift + self.focus_position
         new_offset = offset + shift
 
         # border check
-        new_focus = min(max(new_focus, 0), len(self.body) - 1)
-        new_offset = min(max(new_offset, 0), self._size[1] - 1)
+        new_focus = min(max(0, new_focus), len(self.body) - 1)
+        new_offset = min(max(0, new_offset), self._size[1] - 1)
 
         self.change_focus(self._size, new_focus, offset_inset=new_offset)
         self._ui.update_view()
@@ -166,15 +167,12 @@ class PassList(urwid.ListBox):
             passnode = PassNode(n1, r, sep == '/')
             if Pass.all_pass.get(r) is None:
                 Pass.all_pass[r] = FolderWalker(r)
-            pos = Pass.all_pass[r].insert_sorted(passnode)
-
-            # change saved cursor position
-            Pass.all_pass[r].pos = pos
+            Pass.all_pass[r].pos = Pass.all_pass[r].insert_sorted(passnode)
 
             # do not change cursor position if the path is not relative
-            return pos if r == self.root else None
+            return Pass.all_pass[r].pos if r == self.root else None
 
-        inserted_pos = insert_relative(self.root, node)
+        inserted_pos = insert_relative(self.root, node.strip())
         # change listwalker
         self.body[:] = Pass.all_pass[self.root]
         # focus the new node
@@ -206,10 +204,12 @@ class FolderWalker(list):
 
         # prevent empty list, which troubles listbox operations
         if len(self) == 0:
-            self[:] = [PassNode(None, None)]
+            super().append(PassNode(None, None))
 
     def pop(self, index=-1):
         super().pop(index)
+
+        # add a empty placeholder
         if len(self) == 0:
             super().append(PassNode(None, None))
 
@@ -245,9 +245,14 @@ class UI(urwid.Frame):
         self._help_string = ' a:generate e:edit i:insert y:copy z:toggle /:search'
 
         # widgets
+        self.app_string = urwid.Text(('border', '{}: '.format(self._app_string)))
         self.path_indicator = urwid.Text('', wrap='clip')
         self.help_text = urwid.Text(self._help_string)
-        self.header_widget = urwid.Columns([self.path_indicator, ('pack', self.help_text)])
+        self.header_widget = urwid.Columns([
+            ('pack', self.app_string),
+            urwid.AttrMap(self.path_indicator, 'bright'),
+            ('pack', self.help_text)
+        ])
         self.messagebox = urwid.Text('')
         self.count_indicator = urwid.Text('', align='right')
         self.footer_widget = urwid.Columns([
@@ -386,10 +391,7 @@ class UI(urwid.Frame):
 
     def update_view(self):
         # update header
-        self.path_indicator.set_text([
-            ('border', '{}: '.format(self._app_string)),
-            ('bright', '/{}'.format(self.listbox.root)),
-        ])
+        self.path_indicator.set_text('/{}'.format(self.listbox.root))
 
         # update footer
         self.count_indicator.set_text("{}/{}".format(
@@ -540,8 +542,7 @@ class Pass:
     @staticmethod
     def show(path):
         logging.debug("Showing password for {}".format(path))
-        result = run(['pass', 'show', path], stdout=PIPE, stderr=PIPE, text=True)
-        return result
+        return run(['pass', 'show', path], stdout=PIPE, stderr=PIPE, text=True)
 
     @classmethod
     def edit(cls, path):
@@ -558,30 +559,26 @@ class Pass:
                 return res
             fp.seek(0)
             password = fp.read()
-            res = run(['pass', 'insert', '-m', '-f', path], input=password,
-                      stderr=PIPE, stdout=PIPE)
-            return res
+            return run(['pass', 'insert', '-m', '-f', path], input=password,
+                       stderr=PIPE, stdout=PIPE)
 
     @staticmethod
     def insert(path, password):
         pw = password + '\n' + password + '\n'
-        result = run(['pass', 'insert', '-f', path], input=pw,
-                     stdout=PIPE, stderr=PIPE, text=True)
-        return result
+        return run(['pass', 'insert', '-f', path], input=pw,
+                   stdout=PIPE, stderr=PIPE, text=True)
 
     @staticmethod
     def generate(path):
         command = ['pass', 'generate', '-f', path]
         if config.no_symbols:
             command.append('-n')
-        result = run(command, stdout=PIPE, stderr=PIPE, text=True)
-        return result
+        return run(command, stdout=PIPE, stderr=PIPE, text=True)
 
     @staticmethod
     def delete(path):
         command = ['pass', 'rm', '-r', '-f', path]
-        result = run(command, stdout=PIPE, stderr=PIPE, text=True)
-        return result
+        return run(command, stdout=PIPE, stderr=PIPE, text=True)
 
 
 class MyConfigParser(configparser.RawConfigParser):
