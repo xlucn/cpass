@@ -363,23 +363,22 @@ class UI(urwid.Frame):
         self.editbox.set_edit_text('')
 
     def handle_input(self):
-        if self._edit_type == "search":
+        edit_type = self._edit_type
+        self.unfocus_edit()
+        if edit_type == "search":
             self._search_pattern = self.editbox.edit_text
-            self.unfocus_edit()
             self.search_in_dir(self._search_pattern, 1)
-        elif self._edit_type == "generate":
-            self.unfocus_edit()
+        elif edit_type == "generate":
             self.run_pass(Pass.generate, self.listbox.insert,
                           self.editbox.edit_text, self.listbox.root, "Generate: {}")
             self.listbox.update_root_count()
-        elif self._edit_type == "insert":
+        elif edit_type == "insert":
             self._insert_node = self.editbox.edit_text
             self.focus_edit("insert_password", 'Enter password: ', mask='*')
-        elif self._edit_type == "insert_password":
+        elif edit_type == "insert_password":
             self._insert_pass = self.editbox.edit_text
             self.focus_edit("insert_password_confirm", 'Enter password again: ', mask='*')
-        elif self._edit_type == "insert_password_confirm":
-            self.unfocus_edit()
+        elif edit_type == "insert_password_confirm":
             self._insert_pass_again = self.editbox.edit_text
             if self._insert_pass == self._insert_pass_again:
                 self.run_pass(Pass.insert, self.listbox.insert,
