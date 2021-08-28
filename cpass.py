@@ -525,7 +525,10 @@ class Pass:
     EDITOR = os.getenv("EDITOR", "vi")
     all_pass = dict()
     # exit if pass dir does not exit
-    assert(os.path.exists(PASS_DIR))
+    if not os.path.exists(PASS_DIR):
+        print("'{}' or $PASSWORD_STORE_DIR does not exist".format(FALLBACK_PASS_DIR))
+        print("See `man pass` for how to set password storage directory.")
+        exit()
 
     @classmethod
     def extract_all(cls):
