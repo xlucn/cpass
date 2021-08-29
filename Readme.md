@@ -47,12 +47,13 @@ However, `pass` does a lot of things to assure the robustness and security of pa
   
 - Install with GNU Guix
 
-  The [guixrus channel](https://git.sr.ht/~whereiseveryone/guixrus) also provides cpass.
+  The [GuixRUs](https://git.sr.ht/~whereiseveryone/guixrus) channel also provides `cpass`.
 
-  After [adding guixrus](https://git.sr.ht/~whereiseveryone/guixrus#permanent) to your [channels.scm](https://guix.gnu.org/manual/en/html_node/Using-a-Custom-Guix-Channel.html) run the following:
+  After [adding](https://git.sr.ht/~whereiseveryone/guixrus#subscribing) `GuixRUs` to your [channels.scm](https://guix.gnu.org/manual/en/html_node/Using-a-Custom-Guix-Channel.html), run the following two commands:
 
   ```
-  guix install cpass-guixrus
+  guix pull
+  guix install cpass
   ```
 
 - Clone the repo or download the single script file.
