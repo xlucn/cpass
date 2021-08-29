@@ -44,6 +44,14 @@ However, `pass` does a lot of things to assure the robustness and security of pa
   ```
   pip install --user cpass
   ```
+  
+ ## Install with GNU Guix
+
+The [guixrus channel](https://git.sr.ht/~whereiseveryone/guixrus) also provides cpass.
+
+After [adding guixrus](https://git.sr.ht/~whereiseveryone/guixrus#permanent) to your [channels.scm](https://guix.gnu.org/manual/en/html_node/Using-a-Custom-Guix-Channel.html) run the following:
+
+`guix install cpass-guixrus`
 
 - Clone the repo or download the single script file.
 
