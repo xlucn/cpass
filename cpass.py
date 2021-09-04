@@ -167,7 +167,7 @@ class PassList(urwid.ListBox):
             passnode = PassNode(n1, r, sep == '/')
             if Pass.all_pass.get(r) is None:
                 Pass.all_pass[r] = FolderWalker(r)
-            Pass.all_pass[r].pos = Pass.all_pass[r].insert_sorted(passnode)
+            Pass.all_pass[r].pos = Pass.all_pass[r].insert(passnode)
 
             # do not change cursor position if the path is not relative
             return Pass.all_pass[r].pos if r == self.root else None
@@ -196,6 +196,11 @@ class PassList(urwid.ListBox):
 
 
 class FolderWalker(list):
+    """
+    Customize list operations, mainly
+    - keep a placeholder item in empty list and
+    - keep items sorted
+    """
     def __init__(self, root, dirs=[], files=[]):
         self.pos = 0  # cursor position
 
@@ -213,7 +218,7 @@ class FolderWalker(list):
         if len(self) == 0:
             super().append(PassNode(None, None))
 
-    def insert_sorted(self, node):
+    def insert(self, node):
         # if node already exist, return the index
         for n in self:
             if n.node == node.node and n.isdir == node.isdir:
