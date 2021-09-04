@@ -134,10 +134,10 @@ class PassList(urwid.ListBox):
         self._ui.update_view()
 
     def list_navigate(self, shift=0, new_focus=None):
+        """ either specify a shift offset, or an absolute target position """
         offset = self.get_focus_offset_inset(self._size)[0]
 
-        # either specify a shift offset, or an absolute position
-        if new_focus:
+        if new_focus is not None:
             shift = new_focus - self.focus_position
         else:
             new_focus = shift + self.focus_position
