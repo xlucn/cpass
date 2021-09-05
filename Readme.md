@@ -76,7 +76,7 @@ For `pass` related operations:
 - `d` delete current password file or directory after user confirms
 - `e` edit current password
 - `z` toggle preview
-- `y` + `y/a/[0-9]` copy contents in password
+- `y` + `y/a/[0-9]` copy contents in password ('0' to copy the 10th line)
 - `/` or `?` will start a search (forward/backward)
 - `n` or `N` go to next or previous search result
 

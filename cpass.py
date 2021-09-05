@@ -468,7 +468,7 @@ class UI(urwid.Frame):
             field, sep, value = [s.strip() for s in lines[i].partition(':')]
             # 2. y[0-9] to copy that line, right of colon if applicable
             if i < 10:
-                copiable_fields[str(i + 1)] = value if sep == ':' else field
+                copiable_fields[str(i + 1)[-1]] = value if sep == ':' else field
             # 3. customized field shortcuts
             if sep == ':' and field in config.copy_bindings:
                 copiable_fields[config.copy_bindings[field]] = value
