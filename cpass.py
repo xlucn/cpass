@@ -456,13 +456,20 @@ class UI(urwid.Frame):
 
     def parse_pass(self, passwd):
         # TODO: mark numbers on the side
+        """
+        parse the decryped content of the password file
+        and relate shortcut keys to the corrsponding texts
+        """
         lines = passwd.split('\n')
+        # 1. default: yy to copy first line, ya to copy all lines
         copiable_fields = {'a': passwd, 'y': lines[0], '1': lines[0]}
 
         for i in range(1, len(lines)):
             field, sep, value = [s.strip() for s in lines[i].partition(':')]
+            # 2. y[0-9] to copy that line, right of colon if applicable
             if i < 10:
                 copiable_fields[str(i + 1)] = value if sep == ':' else field
+            # 3. customized field shortcuts
             if sep == ':' and field in config.copy_bindings:
                 copiable_fields[config.copy_bindings[field]] = value
 
@@ -488,6 +495,7 @@ class UI(urwid.Frame):
     def copy_by_key(self, key):
         if key in self._parsed_password:
             copy_text = self._parsed_password[key]
+            # stderr and stdout have to be dropped, otherwise the program is stuck
             res = run(['xclip', '-selection', Pass.X_SELECTION],
                       text=True, input=copy_text, stderr=DEVNULL, stdout=DEVNULL)
             if res.returncode == 0:
