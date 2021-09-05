@@ -503,20 +503,23 @@ class UI(urwid.Frame):
             self.message("No search pattern", alert=True)
             return
 
-        # search from the next/previous, wrap if reach bottom/top
-        direction *= self._search_direction
+        # search from the next/previous, wrap if reaching bottom/top
         start = self.listbox.focus_position
-        length = len(self.listbox.body)
+        direction *= self._search_direction
+        # list of indexes according to the start point and order
+        indexes = list(range(len(self.listbox.body)))
+        # the math here is kind of magic, it's the result after simplification
+        search_list = indexes[start+direction::direction] + \
+                      indexes[:start+direction:direction]
 
-        # The math here is kind of magic. It's the result after simplification
-        if direction > 0:
-            start += 1
-        search_list = list(range(start, length)) + list(range(start))
-
-        icase = pattern == pattern.lower()
-        for i in search_list[::direction]:
+        for i in search_list:
             node = self.listbox.body[i].node
-            if all([s in (node.lower() if icase else node) for s in pattern.split()]):
+            # ignore case if all letters are lower case
+            if pattern == pattern.lower():
+                node = node.lower()
+
+            # search for all space separated words
+            if all([s in node for s in pattern.split()]):
                 self.listbox.list_navigate(new_focus=i)
                 return
 
