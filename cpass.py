@@ -425,7 +425,7 @@ class UI(urwid.Frame):
             preview = res.stderr if res.returncode else res.stdout
         self.preview.original_widget.set_text(preview)
 
-    def run_pass(self, func, lfunc, node, root, msg, args=(), largs=()):
+    def run_pass(self, func, lfunc, node, root, msg='', args=(), largs=()):
         # do not accept password name ends with /, pass itself has problems
         if node.endswith('/'):
             self.message(f'Can not create a directory: {node}.', alert=True)
@@ -434,14 +434,15 @@ class UI(urwid.Frame):
         path = os.path.join(root, node)
         res = func(path, *args)
         if res.returncode == 0:
-            self.message(msg.format(path))
-            if lfunc == self.listbox.insert:
-                lfunc(node)
-            elif lfunc == self.listbox.delete:
-                lfunc(largs[0])
-            self.update_preview(force=True)
+            self.message(msg.format(path) if func != Pass.show else '')
+            if lfunc:
+                lfunc(node if lfunc == self.listbox.insert else largs[0])
+            # some operations like generating password need updating the preview
+            self.update_preview(True)
         else:
             self.message(res.stderr, alert=True)
+
+        return res
 
     def delete_confirm(self, key):
         if key in ['y', 'Y', 'd', 'enter']:
@@ -481,12 +482,11 @@ class UI(urwid.Frame):
         if self._preview_shown:
             password = self.preview.original_widget.text
         else:
-            path = os.path.join(self.listbox.root, self.listbox.focus.node)
-            res = Pass.show(path)
-            if res.returncode != 0:
-                self.message(res.stderr, alert=True)
+            res = self.run_pass(Pass.show, None, self.listbox.focus.node, self.listbox.root)
+            if res.returncode == 0:
+                password = res.stdout
+            else:
                 return
-            password = res.stdout
 
         pw = self.parse_pass(password.rstrip('\n'))
         self.focus_edit("copy", 'Copy [{}]: '.format(''.join(sorted(pw))))
