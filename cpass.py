@@ -188,6 +188,7 @@ class PassList(urwid.ListBox):
 
         self._ui.update_view()
 
+    # TODO: this seems odd being here
     def update_root_count(self):
         for n in Pass.all_pass[os.path.dirname(self.root)]:
             if n.node == self.root and n.isdir:
@@ -235,6 +236,10 @@ class FolderWalker(list):
         return self.index(node)
 
 
+# TODO: auto change split direction based on terminal size
+# TODO: multiline insert, this should be easy since we have the workaround in Pass.edit
+# TODO: mv, cp support
+# TODO: QR code generate, maybe?
 # TODO: background preview, or/and cache preview results
 # TODO: CLI arguments
 # TODO: git support
@@ -368,6 +373,7 @@ class UI(urwid.Frame):
         self.editbox.set_edit_text('')
 
     def handle_input(self):
+        # these codes are ugly
         edit_type = self._edit_type
         self.unfocus_edit()
         if edit_type == "search":
@@ -449,6 +455,7 @@ class UI(urwid.Frame):
             self.run_pass(Pass.delete, self.listbox.delete,
                           self.listbox.focus.node, self.listbox.root,
                           "Deleting {}", largs=(self.listbox.focus_position,))
+            # TODO: put this into lower level functions
             self.listbox.update_root_count()
         elif key in ['n', 'N']:
             self.message("Abort.")
