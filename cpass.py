@@ -51,6 +51,7 @@ class PassList(urwid.ListBox):
     def __init__(self, body, root='', ui=None):
         self._ui = ui
         self.root = root
+        self.root_main = None
         self._size = (1, 1)
         super().__init__(body)
 
@@ -123,7 +124,12 @@ class PassList(urwid.ListBox):
         if direction in 'down' and self.focus.isdir:
             self.root = os.path.join(self.root, self.focus.node)
         elif direction in 'up':
-            self.root = os.path.dirname(self.root)
+            if self.root_main is None:
+                self.root = os.path.dirname(self.root)
+            else:  # self.root_main is set during search mode
+                # back to the directory before searching
+                self.root = self.root_main
+                self.root_main = None
 
         # update listbox content, this way the list itself is not replaced
         self.body[:] = Pass.all_pass[self.root]
@@ -245,6 +251,7 @@ class UI(urwid.Frame):
         self._app_string = 'cPass'
         self._preview_shown = True
         self._edit_type = None
+        self._find_pattern = None
         self._search_pattern = None
         self._search_direction = 1
         self._help_string = ' a:generate e:edit i:insert y:copy z:toggle /:search'
@@ -349,6 +356,8 @@ class UI(urwid.Frame):
         elif action == 'toggle_preview':
             self._preview_shown = not self._preview_shown
             self.update_preview_layout()
+        elif action == 'find':
+            self.focus_edit("find", "Find: ")
         else:
             return super().keypress(size, key)
 
@@ -392,6 +401,21 @@ class UI(urwid.Frame):
                 self.listbox.update_root_count()
             else:
                 self.message("Password is not the same", alert=True)
+        elif edit_type == "find":
+            self._find_pattern = self.editbox.edit_text
+            self.listbox.root_main = self.listbox.root
+            Pass.all_pass[self.listbox.root].pos = self.listbox.focus_position
+
+            result = list()
+            for root in Pass.all_pass:
+                for node in Pass.all_pass[root]:
+                    if not node.isdir and self._find_pattern in node.path:
+                        result.append(PassNode(node.path, ''))
+            result = sorted(result, key=lambda n: n.path)
+            self.listbox.body[:] = result
+            self.listbox.root = ''
+            self.update_view()
+            self.message("searching " + self.editbox.edit_text)
 
     def update_view(self):
         # update header
@@ -642,6 +666,7 @@ class MyConfigParser(configparser.RawConfigParser):
             'search_back': ['?'],
             'search_next': ['n'],
             'search_prev': ['N'],
+            'find': ['f'],
             'insert': ['i'],
             'generate': ['a'],
             'edit': ['e'],

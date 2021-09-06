@@ -79,6 +79,7 @@ For `pass` related operations:
 - `y` + `y/a/[0-9]` copy contents in password ('0' to copy the 10th line)
 - `/` or `?` will start a search (forward/backward)
 - `n` or `N` go to next or previous search result
+- `f` find a file by searching a path pattern in the password store
 
 To-do ones (might change)
 
