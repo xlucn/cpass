@@ -8,8 +8,6 @@ So simply do `pass git reset --hard <some commit>` to revert any changes.
 `cpass` is an [urwid](http://urwid.org/) based terminal user interface (TUI) for the standard unix password manager, [pass](https://www.passwordstore.org/).
 `cpass` tries to achieve a minimal, clean interface and utilizes vim-like keybinding. Also, thanks to the urwid module, mouse is supported quite well.
 
-https://user-images.githubusercontent.com/12032219/123406878-f338b280-d5dd-11eb-951e-2a4fc185a65d.mp4
-
 ## Features:
 
 - Browse the local password store
@@ -32,7 +30,7 @@ Features todo list:
 
 - [pass](https://www.passwordstore.org/)
 - [urwid](http://urwid.org/) module
-- `xclip` for copy passwords
+- [xclip](https://github.com/astrand/xclip) for copying passwords
 
 Make sure you are using a local password store created/compatible with [`pass`](https://www.passwordstore.org/), which `cpass` will look for in `$PASSWORD_STORE_DIR`, otherwise in `~/.password_store/`.
 `pass` is also required, although theoretically a `pass` compatible client does not need `pass` command (e.g., [qtpass](https://qtpass.org/) can work with `git` and `gpg`).
@@ -152,3 +150,7 @@ There is an example configuration file [cpass.cfg](cpass.cfg) with all available
   dir     = "󰉋 "
   file    = "󰈤 "
   ```
+
+## Screenshot
+
+https://user-images.githubusercontent.com/12032219/123406878-f338b280-d5dd-11eb-951e-2a4fc185a65d.mp4
