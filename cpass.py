@@ -254,21 +254,26 @@ class UI(urwid.Frame):
         self._search_pattern = None
         self._search_direction = 1
 
-        # widgets
-        self.app_string = urwid.Text(('border', '{}: '.format(self._app_string)))
-        self.path_indicator = urwid.Text('', wrap='clip')
-        self.help_text = urwid.Text(self._help_string)
+        # header
+        self.header_prefix = urwid.Text(('border', '{}:'.format(self._app_string)))
+        self.path_indicator = urwid.Text(('bright', ''), wrap='clip')
+        self.help_text = urwid.Text(self._help_string, wrap='clip', align='right')
+        # priority on showing full path
         self.header_widget = urwid.Columns([
-            ('pack', self.app_string),
-            urwid.AttrMap(self.path_indicator, 'bright'),
-            ('pack', self.help_text)
-        ])
+            ('pack', self.header_prefix),
+            ('pack', self.path_indicator),
+            self.help_text
+        ], dividechars=1)
+
+        # footer
         self.messagebox = urwid.Text('')
         self.count_indicator = urwid.Text('', align='right')
         self.footer_widget = urwid.Columns([
             self.messagebox,
             ('pack', urwid.AttrMap(self.count_indicator, 'border'))
         ])
+
+        # some dynamic widgets
         self.divider = urwid.AttrMap(urwid.Divider('-'), 'border')
         self.preview = urwid.Filler(urwid.Text(''), valign='top')
         self.editbox = urwid.Edit()
@@ -401,7 +406,7 @@ class UI(urwid.Frame):
 
     def update_view(self):
         # update header
-        self.path_indicator.set_text('/{}'.format(self.listbox.root))
+        self.path_indicator.set_text(('bright', "/" + self.listbox.root))
 
         # update footer
         self.count_indicator.set_text("{}/{}".format(
