@@ -247,7 +247,7 @@ class FolderWalker(list):
 class UI(urwid.Frame):
     def __init__(self):
         self._app_string = 'cPass'
-        self._help_string = ' a:generate e:edit i:insert y:copy z:toggle /:search'
+        self._help_string = ' a:generate d:delete e:edit i:insert y:copy z:toggle /:search'
         self._edit_type = None
         self._last_preview = None
         self._preview_shown = True
