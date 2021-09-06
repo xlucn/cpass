@@ -5,26 +5,22 @@ So it is recommended to back up your passwords or use git (by `pass git init`) t
 On my side, I only use `pass` commands to interact with the password store to minimize any possible damages.
 So simply do `pass git reset --hard <some commit>` to revert any changes.
 
+---
+
 `cpass` is an [urwid](http://urwid.org/) based terminal user interface (TUI) for the standard unix password manager, [pass](https://www.passwordstore.org/).
 `cpass` tries to achieve a minimal, clean interface and utilizes vim-like keybinding. Also, thanks to the urwid module, mouse is supported quite well.
 
 ## Features:
 
-- Browse the local password store
-- Preview the folder and password content in a preview window
-- Colors, key bindings and other customizations through a configuration file
-- Password file operations, e.g., add, generate, edit, remove
-- Copy password in various ways, e.g., first line, all lines, specific field (also customizable)
-- Search keywords within the current window, the general vim-like operation. The searching is smart in case sensitivity, i.e., ignore case when the search keywords contains upper case characters.
+- Browse the local password store and preview the folder and password content
+- Colors, key bindings and other customizability
+- Pass operations, e.g., add, generate, edit, remove
+- Copy password in various ways (also customizable)
+- Search password within the current window, like in vim (smart case sensitivity)
 
 Features todo list:
 
-- Find passwords globally in the password store, the pass find operation
-- Basic pass git operations and status indicator
-- Password file operations, e.g., copy, move, rename (low priority, since can be done with file managers, but it is worth implementing since `pass` commands will create git commits which protect the data)
-- QR code, maybe?
-- Asynchronous preview, or/and cache preview results
-- OTP support
+- More pass operations, e.g., find, copy, move, rename, git, otp
 
 ## Requirement
 
@@ -96,60 +92,40 @@ This is very intuitive.
 ## Configuration
 
 Some appearances or behaviors in the program can be customized through a configuration file located at `$XDG_CONFIG_DIR/cpass/cpass.cfg` or `$HOME/.config/cpass/cpass.cfg`.
-Most importantly, the key bindings and colors can be changed.
 
-There is an example configuration file [cpass.cfg](cpass.cfg) with all available options set to the default value, with detailed comments. You don't have to copy the whole file, because it does not change the default behavior of `cpass`. The different sections in the configuration file corresponds to different types of options, as listed below.
+There is an example configuration file [cpass.cfg](cpass.cfg) with all available options set to the default value, with detailed comments. You don't have to copy the whole file, because it does not change the default behavior of `cpass`.
 
-- `ui`: UI layout.
+Two sections, the `keys` and `color`, need some references:
+- Key bindings in `keys` section:
+  - For all actions available to bind, see the example configuration file.
+  - For the format to specify keys, see the [urwid documentation](http://urwid.org/manual/userinput.html#keyboard-input).
+- Colors in `color` section. The configuration is similar to (can be seen as) an urwid pallete consisting of multiple display attributes. In the example [cpass.cfg](cpass.cfg) I provided enough information to get started. If you want to know more:
+  - See urwid documentation for [definition of a pallete](http://urwid.org/reference/display_modules.html#urwid.BaseScreen.register_palette_entry) and [a palette example](http://urwid.org/manual/displaymodules.html#setting-a-palette).
+  - Also refer to documentation of the [available color names](http://urwid.org/reference/constants.html#foreground-and-background-colors) and general information on [display attributes](http://urwid.org/manual/displayattributes.html).
 
-  Control the preview window layout, either vertical or horizontal split.
-  ```
-  [ui]
-  preview_layout = side/bottom/horizontal/vertical
-  ```
+This is an overview of what can be customized through the configuration file, for the complete list of options, see [cpass.cfg](cpass.cfg):
+```
+[ui]
+preview_layout = side/bottom/horizontal/vertical
 
-- `pass`: `pass` related options.
+[pass]
+no_symbols = true/false
 
-  Whether to use `--no-symbols` option in `pass generate`.
-  ```
-  [pass]
-  no_symbols = true/false
-  ```
+[keys]
+down = j, down, ctrl n
+up = k, up, ctrl p
 
-- `keys`: Key bindings.
+[copy_fields]
+login = l
 
-  For all actions available, see the example configuration file. For the format to specify keys, see the [urwid documentation](http://urwid.org/manual/userinput.html#keyboard-input).
-  ```
-  [keys]
-  down = j, down, ctrl n
-  up = k, up, ctrl p
-  ```
+[color]
+normal   = default, default
+dir      = light blue, default
 
-- `copy_fields`: Copy key bindings.
-
-  The copy behavior can be customized by specifying a key for any field. So at the copy prompt, pressing that key will copy the corresponding field.
-  ```
-  [copy_fields]
-  login = l
-  ```
-
-- `color`: Colors.
-
-  See urwid documentation for [definition](http://urwid.org/reference/display_modules.html#urwid.BaseScreen.register_palette_entry), [a palette example](http://urwid.org/manual/displaymodules.html#setting-a-palette) and [available color names](http://urwid.org/reference/constants.html#foreground-and-background-colors)
-  ```
-  [color]
-  normal   = default, default
-  dir      = light blue, default
-  ```
-
-- `icon`: Icons for folder and files.
-
-  You can specify fancy icons like (below is the Material Design Icons I use, they are not default)
-  ```
-  [icon]
-  dir     = "󰉋 "
-  file    = "󰈤 "
-  ```
+[icon]
+dir     = "󰉋 "
+file    = "󰈤 "
+```
 
 ## Screenshot
 
