@@ -241,13 +241,13 @@ class FolderWalker(list):
 # TODO: otp support
 class UI(urwid.Frame):
     def __init__(self):
-        self._last_preview = None
         self._app_string = 'cPass'
-        self._preview_shown = True
+        self._help_string = ' a:generate e:edit i:insert y:copy z:toggle /:search'
         self._edit_type = None
+        self._last_preview = None
+        self._preview_shown = True
         self._search_pattern = None
         self._search_direction = 1
-        self._help_string = ' a:generate e:edit i:insert y:copy z:toggle /:search'
 
         # widgets
         self.app_string = urwid.Text(('border', '{}: '.format(self._app_string)))
