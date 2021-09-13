@@ -91,13 +91,13 @@ class PassList(urwid.ListBox):
         list_navigation_offsets = {
             'down': 1,
             'up': -1,
+            'page_down': size[1],
+            'page_up': -size[1],
+            'half_page_down': size[1] // 2,
+            'half_page_up': -size[1] // 2,
             # overshoot to go to bottom/top
             'end': len(self.body),
             'home': -len(self.body),
-            'down_screen': size[1],
-            'up_screen': -size[1],
-            'down_half_screen': size[1] // 2,
-            'up_half_screen': -size[1] // 2,
         }
 
         dir_navigation_directions = {
@@ -642,10 +642,10 @@ class MyConfigParser(configparser.RawConfigParser):
             'dir_up': ['h', 'left'],
             'down': ['j', 'down', 'ctrl n'],
             'up': ['k', 'up', 'ctrl p'],
-            'down_screen': ['page down', 'ctrl f'],
-            'up_screen': ['page up', 'ctrl b'],
-            'down_half_screen': ['ctrl d'],
-            'up_half_screen': ['ctrl u'],
+            'page_down': ['page down', 'ctrl f'],
+            'page_up': ['page up', 'ctrl b'],
+            'half_page_down': ['ctrl d'],
+            'half_page_up': ['ctrl u'],
             'end': ['G', 'end'],
             'home': ['g', 'home'],
             'cancel': ['esc'],
