@@ -19,6 +19,7 @@ class PassNode(urwid.AttrMap):
         self._selectable = True
 
         self.node = node
+        self.empty = node == None
         self.isdir = isdir
         self.text = node if node else "-- EMPTY --"
         self.path = os.path.join(root, node) if node else ''
@@ -226,7 +227,7 @@ class FolderWalker(list):
                 return self.index(n)
 
         # pop the empty placeholder node beforehand
-        if len(self) == 1 and self[0].node is None:
+        if len(self) == 1 and self[0].empty:
             super().pop()
 
         # insert and sort, with directories sorted before files
@@ -412,7 +413,7 @@ class UI(urwid.Frame):
         self.count_indicator.set_text("{}/{}".format(
             self.listbox.focus_position + 1,
             len(self.listbox.body)
-        ) if self.listbox.focus.node else "0/0")
+        ) if not self.listbox.focus.empty else "0/0")
 
         self.update_preview()
 
@@ -429,7 +430,7 @@ class UI(urwid.Frame):
 
         if self.listbox.focus.isdir:
             preview = "\n".join([(f.icon + f.text) for f in Pass.all_pass[path]])
-        elif self.listbox.focus.node is None:
+        elif self.listbox.focus.empty:
             preview = ""
         else:
             res = Pass.show(path)
