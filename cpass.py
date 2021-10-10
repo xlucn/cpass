@@ -350,7 +350,7 @@ class UI(urwid.Frame):
             self.run_pass(Pass.edit, None,
                           self.listbox.focus.node, self.listbox.root, "Edit: {}")
             urwid.emit_signal(self, 'redraw')
-        elif action == 'delete':
+        elif action == 'delete' and not self.listbox.focus.empty:
             self.focus_edit("delete", 'Are you sure to delete {} {}? [Y/n]'.format(
                 "the whole folder" if self.listbox.focus.isdir else "the file",
                 os.path.join('/', self.listbox.root, self.listbox.focus.node)

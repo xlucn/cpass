@@ -5,6 +5,7 @@ Fixed:
 - Fix not able to click to focus first element.
 - Prioritize showing full path of current folder on the header, instead of
   letting the help string taking all the space.
+- Deleting in empty directory crashes.
 
 
 0.9.3 2021-08-28
