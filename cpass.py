@@ -15,19 +15,16 @@ version = "0.9.3"
 
 class PassNode(urwid.AttrMap):
     def __init__(self, node, root, isdir=False):
-        """ node=None to represent empty node """
-        self._selectable = True
-
-        self.node = node
         self.empty = node == None
         self.isdir = isdir
-        self.text = node if node else "-- EMPTY --"
+        self.node = node or "-- EMPTY --"
         self.path = os.path.join(root, node) if node else ''
         self.icon = config.icon_dir if isdir else config.icon_file if node else ''
 
+        self._selectable = True
         super().__init__(urwid.Columns([
                 ('pack', urwid.Text(self.icon)),
-                urwid.Text(self.text, wrap='clip'),
+                urwid.Text(self.node, wrap='clip'),
                 ('pack', urwid.Text(''))
             ]),
             'dir' if isdir else '' if node else 'bright',
@@ -422,20 +419,20 @@ class UI(urwid.Frame):
         if not self._preview_shown:
             return
 
-        node = self.listbox.focus.text
-        path = os.path.join(self.listbox.root, node)
-
         if not force and self.listbox.focus == self._last_preview:
             return
         self._last_preview = self.listbox.focus
 
-        if self.listbox.focus.isdir:
-            preview = "\n".join([(f.icon + f.text) for f in Pass.all_pass[path]])
-        elif self.listbox.focus.empty:
-            preview = ""
+        if not self.listbox.focus.empty:
+            path = os.path.join(self.listbox.root, self.listbox.focus.node)
+            if self.listbox.focus.isdir:
+                preview = "\n".join([(f.icon + f.node) for f in Pass.all_pass[path]])
+            else:
+                res = Pass.show(path)
+                preview = res.stderr if res.returncode else res.stdout
         else:
-            res = Pass.show(path)
-            preview = res.stderr if res.returncode else res.stdout
+            preview = ""
+
         self.preview.original_widget.set_text(preview)
 
     def run_pass(self, func, lfunc, node, root, msg='', args=(), largs=()):
