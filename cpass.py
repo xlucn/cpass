@@ -37,8 +37,9 @@ class PassNode(urwid.AttrMap):
         self.update_count()
 
     def update_count(self):
-        # topdown option in os.walk makes this possible,
-        # so that children folders are traversed before its parent
+        # 'topdown' option in os.walk makes this possible (see Pass.extract_all),
+        # so that children folders are traversed before its parent (the 'len'
+        # function below can be executed).
         if self.isdir:
             count = len(Pass.all_pass[self.path])
             self.original_widget.contents[2][0].set_text(str(count))
