@@ -612,10 +612,11 @@ class Pass:
 
 class MyConfigParser(configparser.RawConfigParser):
     def __init__(self):
+        super().__init__()
+
         DEFAULT_CONFIG_DIR = os.path.join(os.getenv("HOME"), ".config")
         CONFIG_DIR = os.getenv("XDG_CONFIG_DIR", DEFAULT_CONFIG_DIR)
         CONFIG = os.path.join(CONFIG_DIR, "cpass", "cpass.cfg")
-        super().__init__()
         if os.path.exists(CONFIG):
             self.read(CONFIG)
 
@@ -662,9 +663,12 @@ class MyConfigParser(configparser.RawConfigParser):
             'quit': ['q']
         }
 
+        # map keys to actions, only one action can be mapped to one key
         keys = {}
+        # default key bindings
         for action in action_keys:
-            keys.update({key: action for key in action_keys[action]})
+            for key in action_keys[action]:
+                keys[key] = action
         # update from configuration file
         if self.has_section('keys'):
             for action in self.options('keys'):
@@ -674,22 +678,23 @@ class MyConfigParser(configparser.RawConfigParser):
         return keys
 
     def get_palette(self):
-        palette = [
-            # name          fg              bg              mono
-            ('normal',      'default',      'default'),
-            ('border',      'light green',  'default'),
-            ('dir',         'light blue',   'default'),
-            ('alert',       'light red',    'default'),
-            ('bright',      'white',        'default'),
-            ('focus',       'standout',     'default'),
-            ('focusdir',    'black',        'light blue',   'bold'),
-        ]
+        palettes = {
+            # name      fg              bg              mono
+            'normal':   ('default',     'default'),
+            'border':   ('light green', 'default'),
+            'dir':      ('light blue',  'default'),
+            'alert':    ('light red',   'default'),
+            'bright':   ('white',       'default'),
+            'focus':    ('standout',    'default'),
+            'focusdir': ('black',       'light blue',   'bold'),
+        }
+
         # update from configuration file
-        for attr in palette:
-            colors = self.get('color', attr[0], ','.join(attr[1:]))
-            if colors:
-                palette[palette.index(attr)] = (attr[0], *re.split(',\\s*', colors))
-        return palette
+        if self.has_section('color'):
+            for name in self.options('color'):
+                palettes[name] = re.split(',\\s*', self.get('color', name, ''))
+
+        return [(name, *palettes[name]) for name in palettes]
 
     def get_copybindings(self):
         """ get field-key pairs """
@@ -703,9 +708,6 @@ class MyConfigParser(configparser.RawConfigParser):
 
 
 def main():
-    logging.basicConfig(level=(logging.DEBUG if os.getenv('DEBUG') else logging.DEBUG),
-                        filename=os.path.join(tempfile.gettempdir(), 'cpass.log'))
-
     Pass.extract_all()
     passui = UI()
 
@@ -716,6 +718,9 @@ def main():
     urwid.connect_signal(passui, 'redraw', mainloop.screen.clear)
     mainloop.run()
 
+
+logging.basicConfig(level=(logging.DEBUG if os.getenv('DEBUG') else logging.DEBUG),
+                    filename=os.path.join(tempfile.gettempdir(), 'cpass.log'))
 
 config = MyConfigParser()
 if __name__ == '__main__':
