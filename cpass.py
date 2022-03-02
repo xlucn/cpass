@@ -15,7 +15,7 @@ version = "0.9.3"
 
 class PassNode(urwid.AttrMap):
     def __init__(self, node, root, isdir=False):
-        self.empty = node == None
+        self.empty = node is None
         self.isdir = isdir
         self.node = node or "-- EMPTY --"
         self.path = os.path.join(root, node) if node else ''
@@ -528,8 +528,8 @@ class UI(urwid.Frame):
         # list of indexes according to the start point and order
         indexes = list(range(len(self.listbox.body)))
         # the math here is kind of magic, it's the result after simplification
-        search_list = indexes[start+direction::direction] + \
-                      indexes[:start+direction:direction]
+        search_list = (indexes[start+direction::direction] +
+                       indexes[:start+direction:direction])
 
         for i in search_list:
             node = self.listbox.body[i].node
