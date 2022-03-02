@@ -1,11 +1,12 @@
-unreleased
+0.9.4 2022-03-22
+
+Some fixes quite some time ago.
 
 Fixed:
 
 - Fix not able to click to focus first element.
-- Prioritize showing full path of current folder on the header, instead of
-  letting the help string taking all the space.
-- Deleting in empty directory crashes.
+- Prioritize showing current folder on the header over help message.
+- Deleting in empty directory doesn't crash now.
 
 
 0.9.3 2021-08-28
