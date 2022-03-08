@@ -1,10 +1,9 @@
 # cpass: another console UI for pass
 
-**!DISCLAIMER!**: Before the version 1.0.0, I do not guarantee that this program will run mostly as intended (doesn't mean 1.0.0 will be perfect, either).
-**Version 1.0.0 might break some of the backward compatibility**, but I will do my best not to break the data.
+**!DISCLAIMER!**: This is still WIP. Before the version 1.0.0, I do not guarantee that this program will run mostly as intended (doesn't mean 1.0.0 will be perfect, either).
+**Version 1.0.0 might break some of the backward compatibility**.
 
 It is recommended to back up your passwords or use git (by `pass git init`) to manage the password store.
-On my side, I only use `pass` commands to interact with the password store to minimize any possible damages.
 
 ---
 
