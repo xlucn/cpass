@@ -4,6 +4,7 @@
 
 import os
 import re
+import sys
 import urwid
 import logging
 import tempfile
@@ -663,12 +664,23 @@ class MyConfigParser(configparser.RawConfigParser):
             'quit': ['q']
         }
 
+        DEPRECATED_ACTIONS = {
+            'down_screen': 'page_down',
+            'up_screen': 'page_up',
+            'down_half_screen': 'half_page_down',
+            'up_half_screen': 'half_page_up',
+        }
+
         keys = {}
         for action in action_keys:
             keys.update({key: action for key in action_keys[action]})
-        # update from configuration file
         if self.has_section('keys'):
             for action in self.options('keys'):
+                if action in DEPRECATED_ACTIONS:
+                    print("Warning: action '{}' in config is deprecated, "
+                          "use '{}' instead".format(action, DEPRECATED_ACTIONS[action]),
+                          file=sys.stderr)
+                    action = DEPRECATED_ACTIONS[action]
                 for key in re.split(',\\s*', self.get('keys', action, '')):
                     keys[key] = action
 
