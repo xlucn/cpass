@@ -1,3 +1,10 @@
+0.9.5 2026-07-01
+
+Changed:
+
+- Modernized build system: replaced setup.py with pyproject.toml (PEP 621).
+- Added .gitignore and MANIFEST.in.
+
 0.9.4 2022-03-22
 
 Some fixes quite some time ago.

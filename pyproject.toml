@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cpass"
+version = "0.9.5"
+description = "A TUI for pass, the standard Unix password manager"
+readme = "Readme.md"
+license = "MIT"
+authors = [{name = "Lu Xu", email = "oliver_lew@outlook.com"}]
+requires-python = ">=3"
+dependencies = ["urwid"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/xlucn/cpass"
+
+[project.scripts]
+cpass = "cpass:main"
+
+[project.optional-dependencies]
+dev = ["build", "twine"]
+
+[tool.setuptools]
+py-modules = ["cpass"]
+
+[tool.setuptools.data-files]
+"share/doc/cpass" = ["cpass.cfg", "CHANGELOG", "Readme.md"]
