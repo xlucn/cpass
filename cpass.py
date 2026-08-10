@@ -2,14 +2,16 @@
 # Author: Lu Xu <oliver_lew at outlook dot com>
 # License: MIT License Copyright (c) 2021 Lu Xu
 
+import configparser
+import logging
 import os
 import re
 import sys
-import urwid
-import logging
 import tempfile
-import configparser
-from subprocess import run, PIPE, DEVNULL
+from subprocess import DEVNULL, PIPE, run
+
+import pyperclip
+import urwid
 
 __version__ = "0.9.5"
 
@@ -507,13 +509,8 @@ class UI(urwid.Frame):
     def copy_by_key(self, key):
         if key in self._parsed_password:
             copy_text = self._parsed_password[key]
-            # stderr and stdout have to be dropped, otherwise the program is stuck
-            res = run(['xclip', '-selection', Pass.X_SELECTION],
-                      text=True, input=copy_text, stderr=DEVNULL, stdout=DEVNULL)
-            if res.returncode == 0:
-                self.message("Copied.")
-            else:
-                self.message("Copy with xclip failed", alert=True)
+            pyperclip.copy(copy_text)
+            self.message("Copied.")
         else:
             self.message("Nothing copied", alert=True)
 
@@ -549,7 +546,6 @@ class UI(urwid.Frame):
 class Pass:
     FALLBACK_PASS_DIR = os.path.join(os.getenv("HOME"), ".password_store")
     PASS_DIR = os.getenv("PASSWORD_STORE_DIR", FALLBACK_PASS_DIR)
-    X_SELECTION = os.getenv("PASSWORD_STORE_X_SELECTION", "clipboard")
     EDITOR = os.getenv("EDITOR", "vi")
     all_pass = dict()
     # exit if pass dir does not exit
